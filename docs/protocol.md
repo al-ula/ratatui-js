@@ -95,7 +95,10 @@ validation.
 
 ## Input contract
 
-TS types reserve normalized key and resize events for the upcoming adapters. Key
-events contain a structured key code, press/repeat/release kind, and modifiers.
-This release does not implement native event reading. Mouse, paste, and focus
-events are deferred.
+TS types define normalized key and resize events for the upcoming adapters.
+`native/crossterm` reads these events for Rust callers and serializes the same
+event shape. Key events contain a structured key code, press/repeat/release
+kind, and modifiers; availability depends on the terminal and platform. Events
+or key codes/modifiers outside this contract are ignored rather than
+misrepresented. Mouse, paste, focus, and enhanced keyboard-mode negotiation are
+deferred.

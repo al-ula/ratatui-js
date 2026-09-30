@@ -1,7 +1,8 @@
 # Proposed native ABI
 
-**Design contract only: no C header, exported symbols, terminal session, or FFI
-implementation exists yet.** Final signatures will be validated with C and Deno
+**Design contract only: no C header, exported symbols, or FFI implementation
+exists yet.** Rust terminal sessions are implemented in `native/crossterm`; this
+ABI will wrap them. Final signatures will be validated with C and Deno
 integration tests before ABI v1 is released.
 
 ## Surface

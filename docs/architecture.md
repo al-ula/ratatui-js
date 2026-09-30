@@ -20,7 +20,10 @@ call JS components through FFI. Ratatui's borrowed `Frame` never leaves Rust.
 - `@ratatui-js/deno`, and later Bun and Node adapters, implement the same
   contract.
 - `native/core` is generic over a Ratatui backend.
-- A future `native/ffi` crate will expose the core through a C-compatible ABI.
+- `native/crossterm` owns the Crossterm terminal lifecycle and input; see
+  [backend design](backend-design.md).
+- A future `native/ffi` crate will expose the renderer and session through a
+  C-compatible ABI.
 
 Workspace package names resolve locally through Deno. No published package or
 native binary is needed to develop the foundation.
@@ -44,6 +47,8 @@ reader threads are infrastructure, not a second application loop.
 
 ## Implementation boundary
 
-Only the protocol, driver contracts, frame creation, and headless rendering
-exist today. Terminal ownership, native input, shutdown synchronization, and
-platform FFI remain separate implementation milestones.
+The protocol, driver contracts, frame creation, headless rendering, and native
+Crossterm sessions exist today. Sessions implement terminal ownership, native
+input, and shutdown synchronization. C ABI, platform FFI adapters, and the
+application runner remain separate implementation milestones. Real-terminal
+integration is verified on Linux; macOS and Windows remain unverified.
