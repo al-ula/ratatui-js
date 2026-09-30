@@ -1,0 +1,306 @@
+{
+  "valid": [
+    {
+      "name": "paragraph",
+      "width": 12,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "paragraph",
+          "lines": [[{ "text": "hello" }], [{ "text": "world" }]]
+        }
+      },
+      "expectedLines": ["hello       ", "world       ", "            "],
+      "expectedStates": []
+    },
+    {
+      "name": "border and title",
+      "width": 10,
+      "height": 4,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "block",
+          "title": "demo",
+          "child": { "type": "paragraph", "lines": [[{ "text": "hello" }]] }
+        }
+      },
+      "expectedLines": ["┌demo────┐", "│hello   │", "│        │", "└────────┘"],
+      "expectedStates": []
+    },
+    {
+      "name": "horizontal layout",
+      "width": 10,
+      "height": 2,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "row",
+          "children": [
+            {
+              "constraint": { "kind": "length", "value": 4 },
+              "node": { "type": "paragraph", "lines": [[{ "text": "L" }]] }
+            },
+            {
+              "constraint": { "kind": "fill", "value": 1 },
+              "node": { "type": "paragraph", "lines": [[{ "text": "R" }]] }
+            }
+          ]
+        }
+      },
+      "expectedLines": ["L   R     ", "          "],
+      "expectedStates": []
+    },
+    {
+      "name": "selected list adjusts scroll offset",
+      "width": 8,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "column",
+          "children": [
+            {
+              "constraint": { "kind": "length", "value": 1 },
+              "node": { "type": "paragraph", "lines": [[{ "text": "title" }]] }
+            },
+            {
+              "constraint": { "kind": "fill", "value": 1 },
+              "node": {
+                "type": "list",
+                "id": "tasks",
+                "selected": 2,
+                "items": [
+                  [{ "text": "a" }],
+                  [{ "text": "b" }],
+                  [{ "text": "c" }]
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "expectedLines": ["title   ", "b       ", "c       "],
+      "expectedStates": [{ "id": "tasks", "offset": 1, "selected": 2 }]
+    },
+    {
+      "name": "wide and combining Unicode",
+      "width": 6,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "paragraph", "lines": [[{ "text": "界é" }]] }
+      },
+      "expectedLines": ["界é   "],
+      "expectedStates": []
+    },
+    {
+      "name": "wrapping a long word",
+      "width": 4,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "paragraph",
+          "wrap": true,
+          "lines": [[{ "text": "abcdef" }]]
+        }
+      },
+      "expectedLines": ["abcd", "ef  ", "    "],
+      "expectedStates": []
+    },
+    {
+      "name": "clipping without wrapping",
+      "width": 4,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "paragraph", "lines": [[{ "text": "abcdef" }]] }
+      },
+      "expectedLines": ["abcd"],
+      "expectedStates": []
+    },
+    {
+      "name": "layout spacing",
+      "width": 9,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "row",
+          "spacing": 1,
+          "children": [
+            {
+              "constraint": { "kind": "length", "value": 4 },
+              "node": { "type": "paragraph", "lines": [[{ "text": "A" }]] }
+            },
+            {
+              "constraint": { "kind": "fill", "value": 1 },
+              "node": { "type": "paragraph", "lines": [[{ "text": "B" }]] }
+            }
+          ]
+        }
+      },
+      "expectedLines": ["A    B   "],
+      "expectedStates": []
+    },
+    {
+      "name": "empty layout",
+      "width": 4,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "row", "children": [] }
+      },
+      "expectedLines": ["    "],
+      "expectedStates": []
+    },
+    {
+      "name": "empty list",
+      "width": 4,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "list", "id": "empty", "items": [] }
+      },
+      "expectedLines": ["    "],
+      "expectedStates": [{ "id": "empty", "offset": 0 }]
+    }
+  ],
+  "invalid": [
+    {
+      "name": "future protocol",
+      "code": "unsupportedProtocol",
+      "frame": {
+        "protocolVersion": 2,
+        "root": { "type": "paragraph", "lines": [] }
+      }
+    },
+    {
+      "name": "unknown field",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "paragraph", "lines": [], "unknown": true }
+      }
+    },
+    {
+      "name": "terminal escape",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "paragraph", "lines": [[{ "text": "\u001b[31m" }]] }
+      }
+    },
+    {
+      "name": "newline in span",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "paragraph", "lines": [[{ "text": "a\nb" }]] }
+      }
+    },
+    {
+      "name": "invalid percentage",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "column",
+          "children": [
+            {
+              "constraint": { "kind": "percentage", "value": 101 },
+              "node": { "type": "paragraph", "lines": [] }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "zero fill",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "column",
+          "children": [
+            {
+              "constraint": { "kind": "fill", "value": 0 },
+              "node": { "type": "paragraph", "lines": [] }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "selection outside list",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "list",
+          "id": "list",
+          "selected": 1,
+          "items": [[{ "text": "one" }]]
+        }
+      }
+    },
+    {
+      "name": "offset outside list",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "list", "id": "list", "offset": 1, "items": [] }
+      }
+    },
+    {
+      "name": "null selection",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "list", "id": "list", "selected": null, "items": [] }
+      }
+    },
+    {
+      "name": "duplicate widget ID",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "row",
+          "children": [
+            {
+              "constraint": { "kind": "fill", "value": 1 },
+              "node": { "type": "list", "id": "same", "items": [] }
+            },
+            {
+              "constraint": { "kind": "fill", "value": 1 },
+              "node": { "type": "list", "id": "same", "items": [] }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "negative spacing",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": { "type": "row", "children": [], "spacing": -1 }
+      }
+    },
+    {
+      "name": "unknown color",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "paragraph",
+          "lines": [],
+          "style": { "fg": "orange" }
+        }
+      }
+    }
+  ]
+}

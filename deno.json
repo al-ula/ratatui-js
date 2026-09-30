@@ -1,0 +1,18 @@
+{
+  "workspace": ["./packages/protocol", "./packages/core"],
+  "tasks": {
+    "check": "deno check packages/protocol/mod.ts packages/core/mod.ts",
+    "test": "deno test --allow-read=tests/fixtures packages",
+    "test:native": "cargo test --manifest-path native/Cargo.toml",
+    "lint": "deno lint packages",
+    "fmt": "deno fmt packages docs tests/fixtures README.md deno.json"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.19"
+  }
+}
