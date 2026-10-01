@@ -50,6 +50,10 @@ fn check(file: &File, input: bool) -> io::Result<()> {
     if mode < 0 {
         return Err(io::Error::last_os_error());
     }
+    #[cfg(target_os = "macos")]
+    if input {
+        check_select_descriptor(file.as_raw_fd())?;
+    }
     let access = mode & libc::O_ACCMODE;
     if (input && access == libc::O_WRONLY) || (!input && access == libc::O_RDONLY) {
         return Err(io::Error::new(
@@ -174,6 +178,77 @@ impl UnixModes {
     }
 }
 
+#[cfg(not(target_os = "macos"))]
+fn poll_readable(fd: i32, timeout: Duration) -> io::Result<bool> {
+    let mut poll = libc::pollfd {
+        fd,
+        events: libc::POLLIN,
+        revents: 0,
+    };
+    // SAFETY: poll borrows exactly one initialized pollfd.
+    let result = unsafe {
+        libc::poll(
+            &mut poll,
+            1,
+            timeout.as_millis().min(i32::MAX as u128) as i32,
+        )
+    };
+    if result < 0 {
+        return Err(io::Error::last_os_error());
+    }
+    if poll.revents & (libc::POLLERR | libc::POLLNVAL) != 0 {
+        return Err(io::Error::other("terminal input poll failed"));
+    }
+    Ok(result > 0)
+}
+
+#[cfg(any(target_os = "macos", test))]
+fn check_select_descriptor(fd: i32) -> io::Result<()> {
+    // FD_SET has undefined behavior for descriptors outside this range.
+    if fd < 0 || fd as usize >= libc::FD_SETSIZE {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "terminal input descriptor exceeds select bounds",
+        ));
+    }
+    Ok(())
+}
+
+// Darwin cannot poll /dev/tty. Use select there, and compile it in Unix tests
+// too so its readiness, timeout, and descriptor bounds are exercised on Linux.
+#[cfg(any(target_os = "macos", test))]
+fn select_readable(fd: i32, timeout: Duration) -> io::Result<bool> {
+    check_select_descriptor(fd)?;
+    let mut readers = std::mem::MaybeUninit::<libc::fd_set>::uninit();
+    // SAFETY: FD_ZERO initializes the set, and fd was checked against FD_SETSIZE.
+    let mut readers = unsafe {
+        libc::FD_ZERO(readers.as_mut_ptr());
+        let mut readers = readers.assume_init();
+        libc::FD_SET(fd, &mut readers);
+        readers
+    };
+    let timeout = timeout.min(Duration::from_millis(i32::MAX as u64));
+    let mut timeout = libc::timeval {
+        tv_sec: timeout.as_secs() as libc::time_t,
+        tv_usec: timeout.subsec_micros() as libc::suseconds_t,
+    };
+    // SAFETY: select borrows initialized storage; fd + 1 fits the set and
+    // timeout fields are bounded. No descriptors or pointers are retained.
+    let result = unsafe {
+        libc::select(
+            fd + 1,
+            &mut readers,
+            std::ptr::null_mut(),
+            std::ptr::null_mut(),
+            &mut timeout,
+        )
+    };
+    if result < 0 {
+        return Err(io::Error::last_os_error());
+    }
+    Ok(result > 0)
+}
+
 pub(crate) struct UnixInput {
     input: File,
     output: File,
@@ -188,27 +263,17 @@ impl UnixInput {
         Ok(())
     }
     fn read_available(&mut self, timeout: Duration) -> io::Result<()> {
-        let mut poll = libc::pollfd {
-            fd: self.input.as_raw_fd(),
-            events: libc::POLLIN,
-            revents: 0,
+        #[cfg(target_os = "macos")]
+        let readiness = select_readable(self.input.as_raw_fd(), timeout);
+        #[cfg(not(target_os = "macos"))]
+        let readiness = poll_readable(self.input.as_raw_fd(), timeout);
+        let ready = match readiness {
+            Ok(ready) => ready,
+            // Return to the reader loop so it can check cancellation and size.
+            Err(error) if error.kind() == io::ErrorKind::Interrupted => return Ok(()),
+            Err(error) => return Err(error),
         };
-        // SAFETY: poll borrows exactly one initialized pollfd.
-        let result = unsafe {
-            libc::poll(
-                &mut poll,
-                1,
-                timeout.as_millis().min(i32::MAX as u128) as i32,
-            )
-        };
-        if result < 0 {
-            let error = io::Error::last_os_error();
-            if error.kind() == io::ErrorKind::Interrupted {
-                return Ok(());
-            }
-            return Err(error);
-        }
-        if result == 0 {
+        if !ready {
             if self.buffer == b"\x1b"
                 && self
                     .escape_since
@@ -221,9 +286,6 @@ impl UnixInput {
                 self.escape_since = None;
             }
             return Ok(());
-        }
-        if poll.revents & (libc::POLLERR | libc::POLLNVAL) != 0 {
-            return Err(io::Error::other("terminal input poll failed"));
         }
         let mut bytes = [0u8; 4096];
         let count = self.input.read(&mut bytes)?;
@@ -353,6 +415,32 @@ mod tests {
             },
             writer,
         )
+    }
+
+    #[test]
+    fn select_reports_timeout_input_and_eof() {
+        let (mut source, mut writer) = source();
+        let fd = source.input.as_raw_fd();
+        assert!(!select_readable(fd, Duration::ZERO).unwrap());
+        writer.write_all(b"q").unwrap();
+        assert!(select_readable(fd, Duration::from_millis(50)).unwrap());
+        let mut byte = [0];
+        source.input.read_exact(&mut byte).unwrap();
+        assert_eq!(byte, [b'q']);
+        assert!(!select_readable(fd, Duration::ZERO).unwrap());
+        drop(writer);
+        assert!(select_readable(fd, Duration::ZERO).unwrap());
+        assert_eq!(source.input.read(&mut byte).unwrap(), 0);
+    }
+
+    #[test]
+    fn select_rejects_descriptors_outside_fd_set_bounds() {
+        for fd in [-1, libc::FD_SETSIZE as i32, i32::MAX] {
+            assert_eq!(
+                select_readable(fd, Duration::ZERO).unwrap_err().kind(),
+                io::ErrorKind::InvalidInput
+            );
+        }
     }
 
     #[test]
