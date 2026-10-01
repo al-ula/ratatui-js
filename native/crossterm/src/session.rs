@@ -6,17 +6,20 @@ use std::{
     time::Duration,
 };
 
-use ratatui::backend::{Backend, CrosstermBackend};
+use ratatui::backend::Backend;
 use ratatui_js_core::{RenderError, RenderResult, Renderer};
 
 use crate::{
     CleanupFailure, SessionError, TerminalEvent,
     input::{CrosstermInput, InputQueue, Lifecycle, lock, start_reader},
+    streams::{Streams, TerminalBackend, TerminalStream},
     terminal::{CrosstermControl, Modes, OwnerGuard, TerminalControl},
 };
 
 #[derive(Debug, Clone, Copy)]
 pub struct SessionOptions {
+    pub input: TerminalStream,
+    pub output: TerminalStream,
     pub alternate_screen: bool,
     /// Opt-in modes are disabled by default. The caller must exclusively own
     /// terminal modes; mouse/paste/focus are disabled again during restoration.
@@ -30,6 +33,8 @@ pub struct SessionOptions {
 impl Default for SessionOptions {
     fn default() -> Self {
         Self {
+            input: TerminalStream::Standard,
+            output: TerminalStream::Standard,
             alternate_screen: true,
             mouse_capture: false,
             bracketed_paste: false,
@@ -49,21 +54,42 @@ pub enum EventPoll {
 /// Owns a real terminal. Share with `Arc<Session>` for concurrent rendering,
 /// event polling, and closing. Always call `close()` to observe cleanup errors.
 pub struct Session {
-    inner: SessionInner<Renderer<CrosstermBackend<io::Stdout>>>,
+    inner: SessionInner<Renderer<TerminalBackend>>,
 }
 
 impl Session {
     pub fn open(options: SessionOptions) -> Result<Self, SessionError> {
         let owner = OwnerGuard::global()?;
+        let streams = Streams::open(options.input, options.output)?;
+        let control = CrosstermControl::new(streams.output);
+        #[cfg(unix)]
+        let (control, mut source) = if let Some((modes, input)) = streams.custom {
+            let source = Arc::new(Mutex::new(input));
+            (
+                control.with_custom(modes, Arc::clone(&source)),
+                crate::input::SelectedInput::Unix(source),
+            )
+        } else {
+            (
+                control,
+                crate::input::SelectedInput::Standard(CrosstermInput),
+            )
+        };
+        #[cfg(not(unix))]
+        let mut source = CrosstermInput;
         let inner = SessionInner::open(
             options,
-            Box::new(CrosstermControl),
+            Box::new(control),
             owner,
             || {
-                Renderer::new(CrosstermBackend::new(io::stdout()))
-                    .map_err(|e| SessionError::io("create renderer", e))
+                let backend = TerminalBackend::new(streams.render_output)
+                    .map_err(|e| SessionError::io("create backend", e))?;
+                Renderer::new(backend).map_err(|e| SessionError::io("create renderer", e))
             },
-            |queue| start_reader(queue, CrosstermInput),
+            |queue| {
+                source.prepare()?;
+                start_reader(queue, source)
+            },
         )?;
         Ok(Self { inner })
     }

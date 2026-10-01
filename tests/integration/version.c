@@ -19,3 +19,7 @@ API uint32_t rt_poll_event(const RtSession *s, uint32_t t, RtBytes *o, RtBytes *
 API uint32_t rt_close(const RtSession *s, RtBytes *e) { (void)s; (void)e; abort(); }
 API uint32_t rt_destroy(RtSession *s, RtBytes *e) { (void)s; (void)e; abort(); }
 API void rt_bytes_free(uint8_t *d, size_t n) { (void)d; (void)n; abort(); }
+
+API uint32_t rt_create_with_streams(uint32_t a, uint32_t p, uint32_t f, int32_t i, int32_t o, RtSession **s, RtBytes *e) {
+    (void)i; (void)o; return rt_create(a, p, f, s, e);
+}

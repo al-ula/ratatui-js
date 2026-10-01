@@ -50,3 +50,14 @@ for fixture in ["deno.ts", "application.ts"]:
 if not windows:
     run("cargo", "test", "--manifest-path", "native/Cargo.toml", "--locked", "-p", "ratatui-js-crossterm",
         "--test", "terminal_pty", "real_terminal_lifecycle", "--", "--ignored", "--nocapture")
+
+if not windows:
+    custom_client = output / "custom-streams-client"
+    run(os.environ.get("CC", "cc"), "-std=c11", "-D_POSIX_C_SOURCE=200809L", "-Wall", "-Wextra", "-Werror",
+        "-I", "native/ffi/include", "tests/integration/custom_streams.c", "-L", output,
+        "-lratatui_js_ffi", f"-Wl,-rpath,{output}", "-o", custom_client)
+    custom_harness = root / "tests/integration/custom_streams.py"
+    run(sys.executable, custom_harness, custom_client)
+    run(sys.executable, custom_harness, shutil.which("deno"), "run", "--allow-ffi", "--allow-env", "--allow-read=tests/fixtures", root / "tests/integration/custom_streams.ts", library)
+    run("cargo", "test", "--manifest-path", "native/Cargo.toml", "--locked", "-p", "ratatui-js-crossterm",
+        "--test", "terminal_pty", "custom_terminal_lifecycle", "--", "--ignored", "--nocapture")

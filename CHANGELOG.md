@@ -7,6 +7,9 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 
 ### Added
 
+- Explicit terminal input/output selection in Rust, the C ABI, and Deno,
+  including Unix file descriptors and `/dev/tty`, owned duplicate handles,
+  custom sizing/input, rollback, and restoration tests.
 - RGB and indexed style colors, with shared TypeScript/Rust validation.
 - Explicit `false` style modifiers remove inherited modifiers; omitted modifiers
   continue to inherit. Previously `false` was additive and had no effect.

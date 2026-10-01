@@ -18,7 +18,7 @@ pub enum SessionError {
     TerminalBusy,
     #[error("terminal ownership is poisoned after failed restoration")]
     TerminalPoisoned,
-    #[error("stdin and stdout must both be connected to a terminal")]
+    #[error("selected input and output must both be connected to a terminal")]
     NotTerminal,
     #[error("Crossterm raw mode is already enabled by another owner")]
     RawModeActive,

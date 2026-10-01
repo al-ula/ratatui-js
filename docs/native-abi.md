@@ -10,15 +10,16 @@ flags before terminal initialization.
 
 The FFI crate builds a shared library and expose:
 
-| Operation        | Purpose                                                       |
-| ---------------- | ------------------------------------------------------------- |
-| `rt_abi_version` | Return the C ABI version without opening a terminal           |
-| `rt_create`      | Negotiate protocol/configuration and return an opaque session |
-| `rt_render`      | Borrow frame bytes and return an owned render-result buffer   |
-| `rt_poll_event`  | Wait with a timeout and return an owned event buffer          |
-| `rt_close`       | Stop input, wake waiters, and restore terminal settings       |
-| `rt_destroy`     | Release a closed session after outstanding calls finish       |
-| `rt_bytes_free`  | Release an output/error buffer allocated by the library       |
+| Operation                | Purpose                                                       |
+| ------------------------ | ------------------------------------------------------------- |
+| `rt_abi_version`         | Return the C ABI version without opening a terminal           |
+| `rt_create_with_streams` | Create with explicit input/output stream selectors            |
+| `rt_create`              | Negotiate protocol/configuration and return an opaque session |
+| `rt_render`              | Borrow frame bytes and return an owned render-result buffer   |
+| `rt_poll_event`          | Wait with a timeout and return an owned event buffer          |
+| `rt_close`               | Stop input, wake waiters, and restore terminal settings       |
+| `rt_destroy`             | Release a closed session after outstanding calls finish       |
+| `rt_bytes_free`          | Release an output/error buffer allocated by the library       |
 
 Use C-compatible fixed-width status values and pointer/`size_t` buffer pairs.
 Rust types and borrowed frames must never appear in the public ABI.
@@ -95,3 +96,33 @@ build uses unwind panics; abort-level failures cannot be contained.
 Structured lifecycle errors follow
 [the protocol schema](protocol.md#lifecycle-errors), including nested
 initialization causes and all restoration failures.
+
+## Terminal stream selection
+
+`rt_create` preserves the standard stdin/stdout behavior.
+`rt_create_with_streams(abi, protocol, flags, input, output, session, error)` is
+an additive ABI 1 symbol. `input` and `output` are signed 32-bit selectors:
+`RT_STREAM_STANDARD` (-1), `RT_STREAM_TTY` (-2), or a nonnegative Unix
+descriptor. Other negative values return `invalidArgument`. Adapters using the
+new symbol require a library that exports it; earlier ABI 1 clients remain
+compatible.
+
+Custom selectors are supported on Unix; on Windows only STANDARD/STANDARD is
+supported. Both selected handles must be terminals, with readable input and
+writable output and blocking status flags. Invalid/closed descriptors, wrong
+access and nonblocking handles return `io` before mode changes. A nonterminal
+returns `notTerminal`. `/dev/tty` opening errors also return `io`.
+
+The caller owns the originals and keeps them live until creation returns. Native
+code duplicates them with close-on-exec, owns those duplicates through session
+destruction, and never closes the originals. Do not concurrently read input or
+change terminal modes or file status flags. Raw mode is applied to the input and
+restores its exact saved termios. Commands/rendering/size queries use the
+output. If separate terminals are selected, keyboard negotiation still expects
+responses on the selected input. Custom resize events poll the output size every
+50 ms and can coalesce intermediate changes.
+
+Creation rollback, sole reader ownership, close cancellation, full cleanup
+attempts, and sticky cleanup outcomes apply equally to custom streams. A failed
+restoration poisons library ownership for every stream selection. Close stops
+the reader before restoring modes; destruction then releases all duplicates.

@@ -64,3 +64,38 @@ Use `onInterrupt(driver, report)` to handle SIGINT/SIGTERM (SIGINT on Windows).
 Retain and call the returned detach function in `finally`, after awaiting
 `driver.close()`. Report interrupt cleanup failures; never rely on finalizers.
 The host must not read terminal input or change terminal modes concurrently.
+
+On Unix, select terminal streams explicitly when stdin/stdout are redirected:
+
+```ts
+const driver = await new DenoAdapter(libraryPath).open({
+  input: "tty",
+  output: "tty",
+});
+```
+
+`input` and `output` independently accept `"standard"` (the default), `"tty"`
+(open `/dev/tty`), or a nonnegative Unix file descriptor. Both must be
+terminals; input must be readable and output writable. Descriptors must be
+blocking and remain valid until `open()` resolves. Native code duplicates them
+with close-on-exec, so the caller retains ownership and can close its originals
+after opening. Do not read the selected input or alter its modes/descriptor
+flags concurrently. Duplicates share file status flags with the originals.
+
+Raw mode and exact saved termios restoration use the selected input. Commands,
+rendering, and dimensions use the selected output; keyboard support responses
+must arrive on the selected input. Resize detection on custom streams polls the
+selected output dimensions every 50 ms, coalescing intermediate sizes. Parsing
+and keyboard negotiation use the session's sole input source. Close cancels the
+reader before restoration; initialization failures also restore attempted modes.
+Custom input sequences are limited to 1 MiB; oversized sequences fail input with
+an `input` error. The adapter releases all duplicated handles when it destroys
+the session during close. Restoration errors poison ownership, preventing later
+sessions even for another terminal. One session is permitted per adapter
+module/native library.
+
+Windows supports standard console streams; explicit descriptors and `"tty"`
+reject with `unsupportedCapability`. Unix custom streams are tested on Linux;
+macOS uses the same Unix implementation but has not been verified locally. The
+adapter requires a library exporting the additive ABI 1 `rt_create_with_streams`
+entrypoint; rebuild older local libraries before use.

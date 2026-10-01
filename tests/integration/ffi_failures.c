@@ -37,3 +37,7 @@ API uint32_t rt_destroy(RtSession *s, RtBytes *e) {
     (void)s; assert(allocations == 0 && closed == 1); e->data = NULL; e->len = 0; return RT_OK;
 }
 API void rt_bytes_free(uint8_t *d, size_t n) { (void)n; if (d) { free(d); allocations--; } }
+
+API uint32_t rt_create_with_streams(uint32_t a, uint32_t p, uint32_t f, int32_t i, int32_t o, RtSession **s, RtBytes *e) {
+    (void)i; (void)o; return rt_create(a, p, f, s, e);
+}

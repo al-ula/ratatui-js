@@ -7,6 +7,7 @@ import type {
   PlatformAdapter,
   TerminalDriver,
   TerminalOptions,
+  TerminalStream,
 } from "@ratatui-js/core";
 import {
   decodeError,
@@ -26,6 +27,11 @@ const symbols = {
   rt_protocol_version: { parameters: [], result: "u32" },
   rt_create: {
     parameters: ["u32", "u32", "u32", "buffer", "buffer"],
+    result: "u32",
+    nonblocking: true,
+  },
+  rt_create_with_streams: {
+    parameters: ["u32", "u32", "u32", "i32", "i32", "buffer", "buffer"],
     result: "u32",
     nonblocking: true,
   },
@@ -109,6 +115,8 @@ export class DenoAdapter implements PlatformAdapter {
         throw new TypeError(`${name} must be boolean`);
       }
     }
+    const input = streamSelector(options.input, "input");
+    const output = streamSelector(options.output, "output");
     // Snapshot options before awaiting permission queries or native loading.
     const modes = {
       mouse: options.mouseCapture === true,
@@ -168,10 +176,12 @@ export class DenoAdapter implements PlatformAdapter {
         });
       }
       const storage = new BigUint64Array(1);
-      const status = await library.symbols.rt_create(
+      const status = await library.symbols.rt_create_with_streams(
         ABI_VERSION,
         PROTOCOL_VERSION,
         flags,
+        input,
+        output,
         storage,
         error,
       );
@@ -427,4 +437,19 @@ export function onInterrupt(
       Deno.removeSignalListener(signal, listener);
     }
   };
+}
+
+function streamSelector(
+  stream: TerminalStream | undefined,
+  name: string,
+): number {
+  if (stream === undefined || stream === "standard") return -1;
+  if (stream === "tty") return -2;
+  if (
+    typeof stream === "number" && Number.isInteger(stream) && stream >= 0 &&
+    stream <= 2_147_483_647
+  ) return stream;
+  throw new TypeError(
+    `${name} must be "standard", "tty", or a nonnegative int32 descriptor`,
+  );
 }

@@ -59,6 +59,22 @@ Deno.test("real library rejects redirected terminal", async () => {
   );
   assertEquals(error.description.code, "notTerminal");
 });
+Deno.test("invalid descriptor rejects before terminal mutation", async () => {
+  const filename = Deno.build.os === "darwin"
+    ? "libratatui_js_ffi.dylib"
+    : Deno.build.os === "windows"
+    ? "ratatui_js_ffi.dll"
+    : "libratatui_js_ffi.so";
+  const error = await assertRejects(
+    () =>
+      new DenoAdapter(new URL(filename, root)).open({ input: 2_147_483_647 }),
+    NativeError,
+  );
+  assertEquals(
+    error.description.code,
+    Deno.build.os === "windows" ? "unsupportedCapability" : "io",
+  );
+});
 Deno.test("malformed results free buffers and shutdown reports restoration errors", async () => {
   const extension = Deno.build.os === "windows"
     ? "dll"

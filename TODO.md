@@ -31,11 +31,11 @@
 
 ## Custom terminal streams
 
-- [ ] Add explicit input/output stream selection, including custom file
+- [x] Add explicit input/output stream selection, including custom file
       descriptors and Unix `/dev/tty` support.
-- [ ] Define stream ownership, handle lifetime, terminal checks, and platform
+- [x] Define stream ownership, handle lifetime, terminal checks, and platform
       support across the native session, C ABI, and adapter options.
-- [ ] Preserve single-reader ownership, cancellation, initialization rollback,
+- [x] Preserve single-reader ownership, cancellation, initialization rollback,
       and terminal restoration for custom streams.
-- [ ] Add integration tests for redirected standard streams, custom terminal
+- [x] Add integration tests for redirected standard streams, custom terminal
       streams, invalid handles, and cleanup failures.

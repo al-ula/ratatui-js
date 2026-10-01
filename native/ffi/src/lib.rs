@@ -1,5 +1,5 @@
 //! C boundary for terminal sessions. See `include/ratatui_js.h` for ownership.
-use ratatui_js_crossterm::{ErrorDescription, EventPoll, Session, SessionOptions};
+use ratatui_js_crossterm::{ErrorDescription, EventPoll, Session, SessionOptions, TerminalStream};
 use std::{
     panic::{AssertUnwindSafe, catch_unwind},
     ptr, slice,
@@ -89,6 +89,24 @@ pub unsafe extern "C" fn rt_create(
     handle: *mut *mut Session,
     error: *mut RtBytes,
 ) -> u32 {
+    // SAFETY: this compatibility entrypoint has the same pointer contract.
+    unsafe { rt_create_with_streams(abi, protocol, flags, -1, -1, handle, error) }
+}
+
+/// # Safety
+/// Same output contract as rt_create. Descriptors are borrowed until return;
+/// -1 selects the standard stream, -2 opens /dev/tty, nonnegative values select
+/// Unix file descriptors. The session owns duplicates of selected descriptors.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rt_create_with_streams(
+    abi: u32,
+    protocol: u32,
+    flags: u32,
+    input: i32,
+    output: i32,
+    handle: *mut *mut Session,
+    error: *mut RtBytes,
+) -> u32 {
     if !handle.is_null() {
         unsafe {
             handle.write(ptr::null_mut());
@@ -113,7 +131,15 @@ pub unsafe extern "C" fn rt_create(
         if flags & !31 != 0 {
             return Err(invalid("unknown session flags"));
         }
+        let select = |value| match value {
+            -1 => Ok(TerminalStream::Standard),
+            -2 => Ok(TerminalStream::Tty),
+            0.. => Ok(TerminalStream::FileDescriptor(value)),
+            _ => Err(invalid("invalid terminal stream selector")),
+        };
         let session = Session::open(SessionOptions {
+            input: select(input)?,
+            output: select(output)?,
             alternate_screen: flags & 1 != 0,
             mouse_capture: flags & 2 != 0,
             bracketed_paste: flags & 4 != 0,

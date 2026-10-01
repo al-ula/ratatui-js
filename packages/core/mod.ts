@@ -32,7 +32,14 @@ export type {
   WidgetStateUpdate,
 } from "@ratatui-js/protocol";
 
+/** Unix fd is borrowed during open; the adapter owns a duplicate until close. */
+export type TerminalStream = "standard" | "tty" | number;
+
 export interface TerminalOptions {
+  /** Defaults to standard input. Unix supports a blocking readable fd or /dev/tty. */
+  readonly input?: TerminalStream;
+  /** Defaults to standard output. Unix supports a blocking writable fd or /dev/tty. */
+  readonly output?: TerminalStream;
   /** Defaults to true for real-terminal adapters. */
   readonly alternateScreen?: boolean;
   /** Opt-in modes default to false and are disabled on close. */

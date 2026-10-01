@@ -90,10 +90,43 @@ pub(crate) trait TerminalControl: Send {
     fn disable_raw(&mut self) -> io::Result<()>;
 }
 
-pub(crate) struct CrosstermControl;
+pub(crate) struct CrosstermControl {
+    output: crate::streams::Output,
+    #[cfg(unix)]
+    custom: Option<(
+        crate::streams::UnixModes,
+        Arc<Mutex<crate::streams::UnixInput>>,
+    )>,
+}
+impl CrosstermControl {
+    pub fn new(output: crate::streams::Output) -> Self {
+        Self {
+            output,
+            #[cfg(unix)]
+            custom: None,
+        }
+    }
+    #[cfg(unix)]
+    pub fn with_custom(
+        mut self,
+        modes: crate::streams::UnixModes,
+        input: Arc<Mutex<crate::streams::UnixInput>>,
+    ) -> Self {
+        self.custom = Some((modes, input));
+        self
+    }
+}
 
 impl TerminalControl for CrosstermControl {
     fn check_terminal(&mut self) -> Result<(), SessionError> {
+        #[cfg(unix)]
+        if let Some((modes, _)) = &self.custom {
+            return if modes.is_terminal() {
+                Ok(())
+            } else {
+                Err(SessionError::NotTerminal)
+            };
+        }
         if io::stdin().is_terminal() && io::stdout().is_terminal() {
             Ok(())
         } else {
@@ -102,40 +135,48 @@ impl TerminalControl for CrosstermControl {
     }
 
     fn raw_mode_enabled(&mut self) -> io::Result<bool> {
+        #[cfg(unix)]
+        if let Some((modes, _)) = &self.custom {
+            return modes.raw_active();
+        }
         terminal::is_raw_mode_enabled()
     }
 
     fn keyboard_supported(&mut self) -> io::Result<bool> {
+        #[cfg(unix)]
+        if let Some((_, input)) = &self.custom {
+            return lock(input).keyboard_supported(&mut self.output);
+        }
         terminal::supports_keyboard_enhancement()
     }
 
     fn enable_mouse(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), EnableMouseCapture)
+        execute!(self.output, EnableMouseCapture)
     }
 
     fn disable_mouse(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), DisableMouseCapture)
+        execute!(self.output, DisableMouseCapture)
     }
 
     fn enable_paste(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), EnableBracketedPaste)
+        execute!(self.output, EnableBracketedPaste)
     }
 
     fn disable_paste(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), DisableBracketedPaste)
+        execute!(self.output, DisableBracketedPaste)
     }
 
     fn enable_focus(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), EnableFocusChange)
+        execute!(self.output, EnableFocusChange)
     }
 
     fn disable_focus(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), DisableFocusChange)
+        execute!(self.output, DisableFocusChange)
     }
 
     fn push_keyboard(&mut self) -> io::Result<()> {
         execute!(
-            io::stdout(),
+            self.output,
             PushKeyboardEnhancementFlags(
                 KeyboardEnhancementFlags::DISAMBIGUATE_ESCAPE_CODES
                     | KeyboardEnhancementFlags::REPORT_EVENT_TYPES
@@ -145,46 +186,54 @@ impl TerminalControl for CrosstermControl {
     }
 
     fn pop_keyboard(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), PopKeyboardEnhancementFlags)
+        execute!(self.output, PopKeyboardEnhancementFlags)
     }
 
     fn enable_raw(&mut self) -> io::Result<()> {
+        #[cfg(unix)]
+        if let Some((modes, _)) = &mut self.custom {
+            return modes.enable_raw();
+        }
         terminal::enable_raw_mode()
     }
 
     fn enter_alternate(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), EnterAlternateScreen)
+        execute!(self.output, EnterAlternateScreen)
     }
 
     fn hide_cursor(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), Hide)
+        execute!(self.output, Hide)
     }
 
     fn clear_screen(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), Clear(ClearType::All))
+        execute!(self.output, Clear(ClearType::All))
     }
 
     fn show_cursor(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), Show)
+        execute!(self.output, Show)
     }
 
     fn reset_attributes(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), SetAttribute(Attribute::Reset))
+        execute!(self.output, SetAttribute(Attribute::Reset))
     }
 
     fn reset_colors(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), ResetColor)
+        execute!(self.output, ResetColor)
     }
 
     fn leave_alternate(&mut self) -> io::Result<()> {
-        execute!(io::stdout(), LeaveAlternateScreen)
+        execute!(self.output, LeaveAlternateScreen)
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        io::stdout().flush()
+        self.output.flush()
     }
 
     fn disable_raw(&mut self) -> io::Result<()> {
+        #[cfg(unix)]
+        if let Some((modes, _)) = &mut self.custom {
+            return modes.restore();
+        }
         terminal::disable_raw_mode()
     }
 }

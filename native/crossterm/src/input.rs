@@ -133,6 +133,14 @@ pub(crate) trait InputSource: Send + 'static {
 
 pub(crate) struct CrosstermInput;
 
+impl CrosstermInput {
+    pub fn prepare(&mut self) -> io::Result<()> {
+        // Register Crossterm's event source and resize notifications before
+        // returning open; poll preserves any event it observes for read().
+        event::poll(Duration::ZERO).map(|_| ())
+    }
+}
+
 impl InputSource for CrosstermInput {
     fn next(&mut self, timeout: Duration) -> io::Result<Option<TerminalEvent>> {
         if event::poll(timeout)? {
@@ -170,3 +178,28 @@ pub(crate) fn start_reader(
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(unix)]
+pub(crate) enum SelectedInput {
+    Standard(CrosstermInput),
+    Unix(Arc<Mutex<crate::streams::UnixInput>>),
+}
+#[cfg(unix)]
+impl InputSource for SelectedInput {
+    fn next(&mut self, timeout: Duration) -> io::Result<Option<TerminalEvent>> {
+        match self {
+            Self::Standard(source) => source.next(timeout),
+            Self::Unix(source) => lock(source).next(timeout),
+        }
+    }
+}
+
+#[cfg(unix)]
+impl SelectedInput {
+    pub fn prepare(&mut self) -> io::Result<()> {
+        match self {
+            Self::Standard(source) => source.prepare(),
+            Self::Unix(source) => lock(source).prepare(),
+        }
+    }
+}

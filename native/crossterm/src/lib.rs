@@ -8,7 +8,9 @@ mod error;
 mod events;
 mod input;
 mod session;
+mod streams;
 mod terminal;
+pub use streams::TerminalStream;
 
 pub use error::{CleanupDescription, CleanupFailure, ErrorDescription, SessionError};
 pub use events::{
