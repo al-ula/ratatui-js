@@ -88,6 +88,10 @@ of Git.
 
 ## Tag-only publishing
 
+JSR requires a single SPDX license identifier in package metadata, so the Deno
+configurations specify `MIT`. The project remains dual-licensed under MIT or
+Apache-2.0 at the user's option, and every package includes both license texts.
+
 The first JSR publication is pending. All four packages exist and are linked to
 this repository: `@ratatui-js/protocol`, `@ratatui-js/core`,
 `@ratatui-js/native`, and `@ratatui-js/deno`. Linking enables the workflow's
