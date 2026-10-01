@@ -1,12 +1,12 @@
 [package]
 name = "ratatui-js-ffi"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-ratatui-js-core = { version = "0.1.0-beta.1", path = "../core" }
-ratatui-js-crossterm = { version = "0.1.0-beta.1", path = "../crossterm" }
+ratatui-js-core = { version = "0.1.0-beta.2", path = "../core" }
+ratatui-js-crossterm = { version = "0.1.0-beta.2", path = "../crossterm" }
 serde_json = "1.0.151"
 
 [lib]

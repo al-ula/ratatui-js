@@ -514,7 +514,7 @@ dependencies = [
 
 [[package]]
 name = "ratatui-js-core"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "ratatui",
  "serde",
@@ -524,7 +524,7 @@ dependencies = [
 
 [[package]]
 name = "ratatui-js-crossterm"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "libc",
  "ratatui",
@@ -536,7 +536,7 @@ dependencies = [
 
 [[package]]
 name = "ratatui-js-ffi"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "ratatui-js-core",
  "ratatui-js-crossterm",

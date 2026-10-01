@@ -5,6 +5,8 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 
 ## [Unreleased]
 
+## [0.1.0-beta.2]
+
 ### Added
 
 - Explicit terminal input/output selection in Rust, the C ABI, and Deno,
@@ -25,6 +27,11 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
   negotiation in Rust, the C ABI, and Deno, with rollback and explicit cleanup.
 - Shared serialization fixtures and native/adapter PTY tests for extended input,
   unsupported terminals, negotiation timeouts, and mode restoration.
+
+### Fixed
+
+- macOS `/dev/tty` input uses `select()` so custom terminal streams support
+  resize and input events without polling errors.
 
 ## [0.1.0-beta.1]
 
