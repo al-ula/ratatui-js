@@ -22,3 +22,9 @@
 - Use the latest stable releases available when adding or updating dependencies; verify current versions rather than relying on memory.
 - Generate and update lockfiles through the package manager for reproducible builds.
 - Discuss compatibility constraints before selecting an older version.
+
+## Git & Commit Rules
+
+* All agent-authored git commits must be GPG-signed using the automation key (`47E64ED51B4D2839B2038A0C605DDC026F462B54` / `isaalula+automation@proton.me`).
+* Do not alter the user's default/global signing configuration. Pass `-c user.signingkey=47E64ED51B4D2839B2038A0C605DDC026F462B54 -c user.email=isaalula+automation@proton.me -S` on commit invocations, or configure it strictly within agent-dedicated worktrees.
+* Name branches and git commits by feature rather than phase numbers or worktree names
