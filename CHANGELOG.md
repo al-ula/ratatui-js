@@ -16,6 +16,8 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 - Give ConPTY children their own console handles when CI redirects host input.
 - Handle ConPTY's initial resize events in terminal integration fixtures.
 
+## [0.1.0-beta.1]
+
 ### Added
 
 - Runtime-independent frame protocol, validation, encoding, and shared errors in
