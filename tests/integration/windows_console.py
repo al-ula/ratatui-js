@@ -62,6 +62,8 @@ write = bind("WriteFile", [HANDLE, c.c_void_p, w.DWORD, c.POINTER(w.DWORD), c.c_
 wait = bind("WaitForSingleObject", [HANDLE, w.DWORD], w.DWORD)
 exit_code = bind("GetExitCodeProcess", [HANDLE, c.POINTER(w.DWORD)], w.BOOL)
 terminate = bind("TerminateProcess", [HANDLE, w.UINT], w.BOOL)
+get_std_handle = bind("GetStdHandle", [w.DWORD], HANDLE)
+set_std_handle = bind("SetStdHandle", [w.DWORD, HANDLE], w.BOOL)
 
 
 def checked(result):
@@ -96,8 +98,17 @@ def run_scenario(command, scenario):
         startup.startup.cb = c.sizeof(StartupEx)
         startup.attributes = c.cast(attributes, c.c_void_p)
         line = c.create_unicode_buffer(subprocess.list2cmdline([*command, scenario]))
-        checked(create_process(None, line, None, None, False, 0x00080000, None, None,
-                               c.byref(startup), c.byref(process)))
+        # CI redirects the host's standard handles. Clear their table entries
+        # while launching so the child receives its own ConPTY console handles.
+        standard_handles = {kind: get_std_handle(kind) for kind in (-10, -11, -12)}
+        try:
+            for kind in standard_handles:
+                checked(set_std_handle(kind, None))
+            checked(create_process(None, line, None, None, False, 0x00080000, None, None,
+                                   c.byref(startup), c.byref(process)))
+        finally:
+            for kind, handle in standard_handles.items():
+                checked(set_std_handle(kind, handle))
         handles.extend([process.process, process.thread])
 
         def consume():

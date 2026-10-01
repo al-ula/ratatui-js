@@ -23,7 +23,8 @@ original = termios.tcgetattr(0)
 child = subprocess.Popen(sys.argv[1:])
 signal.signal(signal.SIGINT, lambda signum, frame: child.send_signal(signum))
 returncode = child.wait()
-assert termios.tcgetattr(0) == original, "terminal modes not restored"
+restored = termios.tcgetattr(0)
+assert restored == original, f"terminal modes not restored: before={original!r}, after={restored!r}"
 if returncode == 0:
     print("PTY_MODES_RESTORED", flush=True)
 sys.exit(returncode)
