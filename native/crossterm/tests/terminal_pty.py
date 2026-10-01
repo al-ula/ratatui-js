@@ -4,11 +4,30 @@ import errno
 import fcntl
 import os
 import select
+import signal
 import struct
 import subprocess
 import sys
 import termios
 import time
+
+# Keep the terminal's session leader alive until restoration has been checked.
+# Darwin revokes the slave when the session leader exits, even if we retain it.
+TERMINAL_SUPERVISOR = """
+import signal
+import subprocess
+import sys
+import termios
+
+original = termios.tcgetattr(0)
+child = subprocess.Popen(sys.argv[1:])
+signal.signal(signal.SIGINT, lambda signum, frame: child.send_signal(signum))
+returncode = child.wait()
+assert termios.tcgetattr(0) == original, "terminal modes not restored"
+if returncode == 0:
+    print("PTY_MODES_RESTORED", flush=True)
+sys.exit(returncode)
+"""
 
 
 def run_scenario(executable, scenario):
@@ -26,7 +45,8 @@ def run_scenario(executable, scenario):
         environment = dict(os.environ)
         environment["RATATUI_JS_PTY_SCENARIO"] = scenario
         process = subprocess.Popen(
-            [executable, "--ignored", "--exact", "pty_child", "--nocapture"],
+            [sys.executable, "-c", TERMINAL_SUPERVISOR,
+             executable, "--ignored", "--exact", "pty_child", "--nocapture"],
             stdin=slave,
             stdout=slave,
             stderr=slave,
@@ -63,7 +83,9 @@ def run_scenario(executable, scenario):
                 break
 
         assert process.returncode == 0, f"{scenario}: child failed"
-        assert termios.tcgetattr(slave) == original, f"{scenario}: terminal modes not restored"
+        assert b"PTY_MODES_RESTORED" in output, f"{scenario}: terminal modes not restored"
+        if sys.platform != "darwin":
+            assert termios.tcgetattr(slave) == original, f"{scenario}: terminal modes not restored"
         if scenario in ("keyboard", "no-alternate"):
             assert sent_quit, f"{scenario}: keyboard path was not exercised"
         if scenario != "raw-active":
@@ -87,7 +109,7 @@ def run_scenario(executable, scenario):
     finally:
         if process is not None:
             if process.poll() is None:
-                process.kill()
+                os.killpg(process.pid, signal.SIGKILL)
             process.wait()
         os.close(master)
         os.close(slave)

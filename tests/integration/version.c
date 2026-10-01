@@ -1,9 +1,8 @@
-#include "ratatui_js.h"
 #ifdef _WIN32
-#define API __declspec(dllexport)
-#else
-#define API
+#define RT_API __declspec(dllexport)
 #endif
+#include "ratatui_js.h"
+#define API RT_API
 #ifndef ABI
 #define ABI 1
 #endif

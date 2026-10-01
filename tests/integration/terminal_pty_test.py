@@ -7,9 +7,30 @@ import unittest
 from unittest.mock import Mock, patch
 
 root = Path(__file__).resolve().parents[2]
+HARNESS_PATHS = ["tests/integration/terminal_pty.py", "native/crossterm/tests/terminal_pty.py"]
+
+
+def load_harness(path):
+    spec = importlib.util.spec_from_file_location("pty_harness", root / path)
+    harness = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(harness)
+    return harness
 
 
 class TerminalPtyTests(unittest.TestCase):
+    def test_supervisor_rejects_unrestored_modes(self):
+        for path in HARNESS_PATHS:
+            with self.subTest(path=path), ExitStack() as stack:
+                harness = load_harness(path)
+                child = Mock()
+                child.wait.return_value = 0
+                stack.enter_context(patch.object(harness.subprocess, "Popen", return_value=child))
+                stack.enter_context(patch.object(harness.termios, "tcgetattr", side_effect=[[0], [1]]))
+                stack.enter_context(patch.object(harness.signal, "signal"))
+                stack.enter_context(patch.object(harness.sys, "argv", ["supervisor", "client"]))
+                with self.assertRaisesRegex(AssertionError, "terminal modes not restored"):
+                    exec(harness.TERMINAL_SUPERVISOR, {})
+
     def test_exited_child_drains_output_and_stops_at_eof(self):
         self.check_exited_child(0)
 
@@ -22,13 +43,11 @@ class TerminalPtyTests(unittest.TestCase):
             ("native/crossterm/tests/terminal_pty.py", "client"),
         ]
         output = (b"\x1b[?1049h\x1b[?25l\x1b[2J\x1b[1;1HPTY frame"
-                  b"PTY_READY\nPTY_RESIZED\n\x1b[?25h\x1b[?1049l")
+                  b"PTY_READY\nPTY_RESIZED\n\x1b[?25h\x1b[?1049lPTY_MODES_RESTORED\n")
         for path, command in harnesses:
             for eof in [b"", OSError(errno.EIO, "PTY closed")]:
                 with self.subTest(path=path, eof=eof), ExitStack() as stack:
-                    spec = importlib.util.spec_from_file_location("pty_harness", root / path)
-                    harness = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(harness)
+                    harness = load_harness(path)
                     process = Mock(returncode=returncode)
                     process.poll.return_value = returncode
                     stack.enter_context(patch.object(harness.os, "openpty", return_value=(10, 11)))

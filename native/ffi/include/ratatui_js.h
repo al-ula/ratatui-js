@@ -2,6 +2,10 @@
 #define RATATUI_JS_H
 #include <stdint.h>
 #include <stddef.h>
+/* DLL implementations can supply __declspec(dllexport) before inclusion. */
+#ifndef RT_API
+#define RT_API
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,14 +29,14 @@ typedef struct { uint8_t *data; size_t len; } RtBytes;
  * Destroy requires all outstanding calls to have returned. It consumes the
  * handle even on error; never reuse it. Call close explicitly to observe errors.
  * Never unload while handles, calls, or buffers exist. */
-uint32_t rt_abi_version(void);
-uint32_t rt_protocol_version(void);
-uint32_t rt_create(uint32_t abi, uint32_t protocol, uint32_t flags, RtSession **session, RtBytes *error);
-uint32_t rt_render(const RtSession *session, const uint8_t *data, size_t len, RtBytes *output, RtBytes *error);
-uint32_t rt_poll_event(const RtSession *session, uint32_t timeout_ms, RtBytes *output, RtBytes *error);
-uint32_t rt_close(const RtSession *session, RtBytes *error);
-uint32_t rt_destroy(RtSession *session, RtBytes *error);
-void rt_bytes_free(uint8_t *data, size_t len);
+RT_API uint32_t rt_abi_version(void);
+RT_API uint32_t rt_protocol_version(void);
+RT_API uint32_t rt_create(uint32_t abi, uint32_t protocol, uint32_t flags, RtSession **session, RtBytes *error);
+RT_API uint32_t rt_render(const RtSession *session, const uint8_t *data, size_t len, RtBytes *output, RtBytes *error);
+RT_API uint32_t rt_poll_event(const RtSession *session, uint32_t timeout_ms, RtBytes *output, RtBytes *error);
+RT_API uint32_t rt_close(const RtSession *session, RtBytes *error);
+RT_API uint32_t rt_destroy(RtSession *session, RtBytes *error);
+RT_API void rt_bytes_free(uint8_t *data, size_t len);
 #ifdef __cplusplus
 }
 #endif

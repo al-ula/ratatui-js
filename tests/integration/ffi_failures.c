@@ -1,14 +1,13 @@
 /* A deliberately malformed library fixture. Destroy aborts if the adapter has
  * leaked any owned buffers; the real-library PTY tests cover terminal behavior. */
+#ifdef _WIN32
+#define RT_API __declspec(dllexport)
+#endif
 #include "ratatui_js.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef _WIN32
-#define API __declspec(dllexport)
-#else
-#define API
-#endif
+#define API RT_API
 static int allocations;
 static int closed;
 static int token;
