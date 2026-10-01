@@ -1,4 +1,4 @@
-"""Linux real-terminal lifecycle tests for the Rust child fixture."""
+"""Unix real-terminal lifecycle tests for C and Deno clients."""
 
 import errno
 import fcntl
@@ -63,7 +63,9 @@ def run_scenario(command, scenario):
                 keys = b"\x1b[B\x1b[B\x1b[Aq" if any("application.ts" in arg for arg in command) else b"q"
                 os.write(master, keys)
                 sent_quit = True
-            if process.poll() is not None and not ready:
+            # BSD PTYs can remain readable at EOF after the child exits.
+            # Drain buffered output, then stop on either EOF or no readiness.
+            if process.poll() is not None and (not ready or not chunk):
                 break
 
         assert process.returncode == 0, f"{scenario}: child failed"
@@ -97,5 +99,6 @@ def run_scenario(command, scenario):
         os.close(slave)
 
 
-for scenario in ("keyboard", "no-alternate", "close-wait", "interrupt") if "deno" in sys.argv[1] else ("keyboard", "no-alternate", "close-wait"):
-    run_scenario(sys.argv[1:], scenario)
+if __name__ == "__main__":
+    for scenario in ("keyboard", "no-alternate", "close-wait", "interrupt") if "deno" in sys.argv[1] else ("keyboard", "no-alternate", "close-wait"):
+        run_scenario(sys.argv[1:], scenario)

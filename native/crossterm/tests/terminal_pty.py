@@ -1,4 +1,4 @@
-"""Linux real-terminal lifecycle tests for the Rust child fixture."""
+"""Unix real-terminal lifecycle tests for the Rust child fixture."""
 
 import errno
 import fcntl
@@ -57,7 +57,9 @@ def run_scenario(executable, scenario):
             ):
                 os.write(master, b"q")
                 sent_quit = True
-            if process.poll() is not None and not ready:
+            # BSD PTYs can remain readable at EOF after the child exits.
+            # Drain buffered output, then stop on either EOF or no readiness.
+            if process.poll() is not None and (not ready or not chunk):
                 break
 
         assert process.returncode == 0, f"{scenario}: child failed"
@@ -91,5 +93,6 @@ def run_scenario(executable, scenario):
         os.close(slave)
 
 
-for scenario in ("keyboard", "no-alternate", "close-wait", "drop", "raw-active"):
-    run_scenario(sys.argv[1], scenario)
+if __name__ == "__main__":
+    for scenario in ("keyboard", "no-alternate", "close-wait", "drop", "raw-active"):
+        run_scenario(sys.argv[1], scenario)

@@ -5,6 +5,12 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 
 ## [Unreleased]
 
+### Fixed
+
+- Enforce LF line endings so formatting checks agree across platforms.
+- Stop Unix PTY test harnesses at EOF after child exit, avoiding false timeouts
+  on macOS while retaining output and terminal restoration checks.
+
 ## [0.1.0-beta.1]
 
 ### Added

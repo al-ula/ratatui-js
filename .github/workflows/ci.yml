@@ -36,6 +36,9 @@ jobs:
       - run: cargo test --manifest-path native/Cargo.toml --locked
       - run: cargo clippy --manifest-path native/Cargo.toml --all-targets --locked -- -D warnings
       - run: python tests/integration/releases_test.py
+      - name: Check Unix PTY harness EOF handling
+        if: runner.os != 'Windows'
+        run: python tests/integration/terminal_pty_test.py
       - run: python tests/integration/run.py
       - run: python scripts/package-native.py --verified
       - run: python tests/integration/package.py
