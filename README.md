@@ -22,10 +22,9 @@ runner and typed UI builders:
 - `native/crossterm`: terminal ownership, input, and explicit restoration.
 - `native/ffi`: versioned C ABI with a public header and integration tests.
 
-Linux x86_64 GNU has verified Rust, C, Deno, and application PTY coverage. macOS
-and Windows coverage is configured in CI and remains unverified. Packages are
-not yet published. See the [roadmap](docs/roadmap.md) and
-[release matrix](docs/releases.md).
+The `0.1.0-beta.1` candidate has verified terminal integration and clean-install
+coverage for Linux x86_64 GNU, macOS aarch64, and Windows x86_64 MSVC. Packages
+are not yet published. See the [release matrix](docs/releases.md).
 
 ## Deno application
 
@@ -110,7 +109,7 @@ const bytes = encodeFrame(frame);
 The Deno adapter submits those bytes to the native renderer in one call.
 
 See [architecture](docs/architecture.md), [protocol](docs/protocol.md),
-[roadmap](docs/roadmap.md), [backend design](docs/backend-design.md), and the
+[backend design](docs/backend-design.md), and the
 [native ABI](docs/native-abi.md).
 
 ## License

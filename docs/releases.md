@@ -2,18 +2,20 @@
 
 ## Verification matrix
 
-| Target              | Rust   | Deno  | Terminal coverage                     | Status           |
-| ------------------- | ------ | ----- | ------------------------------------- | ---------------- |
-| Linux x86_64 GNU    | 1.98.0 | 2.9.6 | Rust/C/Deno/application PTYs          | Locally verified |
-| macOS aarch64       | 1.98.0 | 2.9.6 | Unix PTY suite configured in CI       | Awaiting CI      |
-| Windows x86_64 MSVC | 1.98.0 | 2.9.6 | Console/ConPTY suite configured in CI | Awaiting CI      |
+| Target              | Rust   | Deno  | Terminal coverage                 | Status         |
+| ------------------- | ------ | ----- | --------------------------------- | -------------- |
+| Linux x86_64 GNU    | 1.98.0 | 2.9.6 | Rust/C/Deno/application PTYs      | Verified in CI |
+| macOS aarch64       | 1.98.0 | 2.9.6 | Rust/C/Deno/application PTYs      | Verified in CI |
+| Windows x86_64 MSVC | 1.98.0 | 2.9.6 | C/Deno/application Console/ConPTY | Verified in CI |
 
-Only Linux x86_64 GNU is currently verified. Linux release builds use glibc 2.39
-or newer (Ubuntu 24.04 CI); musl is outside this release matrix. The local GNU
-artifact requires GLIBC_2.39 according to its ELF version metadata. macOS and
-Windows must pass their own suites before being advertised as supported. Other
-architectures resolve artifact names but have no release or support claim.
-Earlier Rust/Deno versions have not been tested.
+All three targets passed the complete checks, native integration, packaging, and
+clean-install suites in
+[CI run 36837492309](https://github.com/al-ula/ratatui-js/actions/runs/36837492309)
+for commit `8685fdb`. The verified archives use version `0.1.0-beta.1`, ABI 1,
+and protocol 1. Linux release builds require glibc 2.39 or newer (Ubuntu 24.04
+CI); musl is outside this release matrix. Other architectures resolve artifact
+names but have no release or support claim. Earlier Rust/Deno versions have not
+been tested.
 
 CI runs checks, unit tests, formatting, lint, Clippy, native integration,
 release packaging, and clean-cache installation checks independently on all
@@ -86,12 +88,13 @@ of Git.
 
 ## Tag-only publishing
 
-The packages remain unpublished. Create and link all four JSR packages to this
-repository: `@ratatui-js/protocol`, `@ratatui-js/core`, `@ratatui-js/native`,
-and `@ratatui-js/deno`. Linking enables the workflow's GitHub OIDC
-authentication (`id-token: write`); no stored JSR token or publishing secret is
-needed. GitHub release attachments use the workflow's built-in, run-scoped
-`github.token`. Linking does not itself publish the repository.
+The first JSR publication is pending. All four packages exist and are linked to
+this repository: `@ratatui-js/protocol`, `@ratatui-js/core`,
+`@ratatui-js/native`, and `@ratatui-js/deno`. Linking enables the workflow's
+GitHub OIDC authentication (`id-token: write`); no stored JSR token or
+publishing secret is needed. GitHub release attachments use the workflow's
+built-in, run-scoped `github.token`. Linking does not itself publish the
+repository.
 
 Only pushing a version tag such as `v0.1.0-beta.1` or `v0.1.0` triggers
 `release.yml`. Prerelease tags create GitHub prereleases and are not marked as

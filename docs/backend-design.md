@@ -1,9 +1,9 @@
 # Native terminal backend design
 
 The Rust Crossterm session, C ABI, and Deno adapter are implemented. This
-document records their backend design. Linux PTY integration is verified; macOS
-and Windows remain unverified. See [native ABI](native-abi.md) for the public
-header and cross-language ownership contract.
+document records their backend design. Linux and macOS PTY integration and
+Windows ConPTY integration are verified in CI. See [native ABI](native-abi.md)
+for the public header and cross-language ownership contract.
 
 ## Goals and scope
 

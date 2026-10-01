@@ -52,4 +52,4 @@ The protocol, driver contracts, frame creation, headless rendering, and native
 Crossterm sessions exist today. Sessions implement terminal ownership, native
 input, and shutdown synchronization. The C ABI, Deno FFI adapter, application
 runner, and UI builders are implemented. Real-terminal integration is verified
-on Linux; macOS and Windows remain unverified.
+on Linux x86_64 GNU, macOS aarch64, and Windows x86_64 MSVC.

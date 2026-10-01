@@ -5,20 +5,10 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 
 ## [Unreleased]
 
-### Fixed
-
-- Enforce LF line endings so formatting checks agree across platforms.
-- Stop Unix PTY test harnesses at EOF after child exit, avoiding false timeouts
-  on macOS while retaining output and terminal restoration checks.
-- Check restored Unix terminal modes before the session leader exits and macOS
-  revokes the terminal, settling macOS's pending input state before comparison.
-- Align fixture DLL export declarations with definitions for MSVC compilation.
-- Give ConPTY children their own console handles when CI redirects host input.
-- Handle ConPTY's initial resize events in terminal integration fixtures.
-- Ignore key-release events in the application integration fixture so Windows
-  key presses update selection once.
-
 ## [0.1.0-beta.1]
+
+Initial beta release of `ratatui-js`. All four `@ratatui-js` packages share this
+version.
 
 ### Added
 
@@ -35,5 +25,8 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 
 ### Platform status
 
-- Linux x86_64 GNU is verified locally. macOS aarch64 and Windows x86_64 MSVC
-  verification is configured in CI and awaits review.
+- Linux x86_64 GNU, macOS aarch64, and Windows x86_64 MSVC passed terminal
+  lifecycle, adapter, application, packaging, and clean-install checks in
+  [CI](https://github.com/al-ula/ratatui-js/actions/runs/36837492309).
+- Linux binaries require glibc 2.39 or newer. Other targets are outside this
+  beta release matrix.
