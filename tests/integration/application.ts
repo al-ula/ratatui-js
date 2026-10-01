@@ -32,7 +32,7 @@ const app = startApplication(driver, {
       },
     ]),
   update: (model, event) => {
-    if (event.type !== "key") return model;
+    if (event.type !== "key" || event.kind === "release") return model;
     if (event.key.type === "character" && event.key.value === "q") return EXIT;
     if (event.key.type === "down") {
       return { ...model, selected: Math.min(2, model.selected + 1) };

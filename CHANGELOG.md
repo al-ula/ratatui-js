@@ -15,6 +15,8 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 - Align fixture DLL export declarations with definitions for MSVC compilation.
 - Give ConPTY children their own console handles when CI redirects host input.
 - Handle ConPTY's initial resize events in terminal integration fixtures.
+- Ignore key-release events in the application integration fixture so Windows
+  key presses update selection once.
 
 ## [0.1.0-beta.1]
 
