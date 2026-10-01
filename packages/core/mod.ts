@@ -12,7 +12,14 @@ export type {
   Color,
   Constraint,
   FrameDescription,
+  KeyCode,
+  KeyModifier,
+  KeyState,
   LayoutChild,
+  MediaKeyCode,
+  ModifierKeyCode,
+  MouseButton,
+  MouseKind,
   Padding,
   RenderResult,
   Style,
@@ -25,12 +32,23 @@ export type {
 export interface TerminalOptions {
   /** Defaults to true for real-terminal adapters. */
   readonly alternateScreen?: boolean;
+  /** Opt-in modes default to false and are disabled on close. */
+  readonly mouseCapture?: boolean;
+  readonly bracketedPaste?: boolean;
+  readonly focusReporting?: boolean;
+  /** Require terminal support; unsupported terminals reject open(). */
+  readonly enhancedKeyboard?: boolean;
 }
 
 export interface TerminalCapabilities {
   readonly protocolVersion: typeof PROTOCOL_VERSION;
   readonly keyboard: boolean;
   readonly resize: boolean;
+  /** True when the adapter enabled the requested mode. Delivery also depends on the terminal. */
+  readonly mouse?: boolean;
+  readonly paste?: boolean;
+  readonly focus?: boolean;
+  readonly enhancedKeyboard?: boolean;
 }
 
 /** A platform adapter owns native loading, memory, and concurrency safety. */

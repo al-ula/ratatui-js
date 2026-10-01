@@ -5,6 +5,15 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 
 ## [Unreleased]
 
+### Added
+
+- Mouse, paste, and focus input events; complete Crossterm key codes, modifiers,
+  event kinds, and keypad/lock state in the shared protocol and validation.
+- Opt-in mouse capture, bracketed paste, focus reporting, and enhanced keyboard
+  negotiation in Rust, the C ABI, and Deno, with rollback and explicit cleanup.
+- Shared serialization fixtures and native/adapter PTY tests for extended input,
+  unsupported terminals, negotiation timeouts, and mode restoration.
+
 ## [0.1.0-beta.1]
 
 Initial beta release of `ratatui-js`. All four `@ratatui-js` packages share this

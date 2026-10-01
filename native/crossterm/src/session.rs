@@ -18,12 +18,23 @@ use crate::{
 #[derive(Debug, Clone, Copy)]
 pub struct SessionOptions {
     pub alternate_screen: bool,
+    /// Opt-in modes are disabled by default. The caller must exclusively own
+    /// terminal modes; mouse/paste/focus are disabled again during restoration.
+    pub mouse_capture: bool,
+    pub bracketed_paste: bool,
+    pub focus_reporting: bool,
+    /// Require progressive keyboard enhancement; fail if unsupported.
+    pub enhanced_keyboard: bool,
 }
 
 impl Default for SessionOptions {
     fn default() -> Self {
         Self {
             alternate_screen: true,
+            mouse_capture: false,
+            bracketed_paste: false,
+            focus_reporting: false,
+            enhanced_keyboard: false,
         }
     }
 }

@@ -76,9 +76,15 @@ timeout, 2 closed, 3 error. `RtBytes` is `{uint8_t *data; size_t len;}`; all
 output pointers are required and must be aligned and disjoint. Output storage
 must contain no unreleased buffers. A null error output returns status 3 without
 running the operation. Null arguments are rejected; arbitrary invalid addresses
-cannot be safely validated by a C library. Creation flags currently accept only
-bit 0, alternate screen. Timeout is an unsigned 32-bit millisecond count. Zero
-checks immediately.
+cannot be safely validated by a C library. Creation flags are bit 0
+(`RT_ALTERNATE_SCREEN`), bit 1 (`RT_MOUSE_CAPTURE`), bit 2
+(`RT_BRACKETED_PASTE`), bit 3 (`RT_FOCUS_REPORTING`), and bit 4
+(`RT_ENHANCED_KEYBOARD`). Unknown bits are rejected before terminal mutation.
+Enhanced keyboard requests require a successful support probe; unsupported
+terminals return `unsupportedCapability`, and probe timeouts return `io`. Every
+attempted mode is restored on creation failure or close; see
+[input contract](protocol.md#input-contract). Timeout is an unsigned 32-bit
+millisecond count. Zero checks immediately.
 
 Destroy consumes the handle even when cleanup reports failure. Call close and
 wait for all operations before destroy; destruction must never overlap any other

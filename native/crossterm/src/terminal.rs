@@ -6,6 +6,11 @@ use std::{
 
 use ratatui::crossterm::{
     cursor::{Hide, Show},
+    event::{
+        DisableBracketedPaste, DisableFocusChange, DisableMouseCapture, EnableBracketedPaste,
+        EnableFocusChange, EnableMouseCapture, KeyboardEnhancementFlags,
+        PopKeyboardEnhancementFlags, PushKeyboardEnhancementFlags,
+    },
     execute,
     style::{Attribute, ResetColor, SetAttribute},
     terminal::{self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
@@ -64,6 +69,15 @@ impl Drop for OwnerGuard {
 pub(crate) trait TerminalControl: Send {
     fn check_terminal(&mut self) -> Result<(), SessionError>;
     fn raw_mode_enabled(&mut self) -> io::Result<bool>;
+    fn keyboard_supported(&mut self) -> io::Result<bool>;
+    fn enable_mouse(&mut self) -> io::Result<()>;
+    fn disable_mouse(&mut self) -> io::Result<()>;
+    fn enable_paste(&mut self) -> io::Result<()>;
+    fn disable_paste(&mut self) -> io::Result<()>;
+    fn enable_focus(&mut self) -> io::Result<()>;
+    fn disable_focus(&mut self) -> io::Result<()>;
+    fn push_keyboard(&mut self) -> io::Result<()>;
+    fn pop_keyboard(&mut self) -> io::Result<()>;
     fn enable_raw(&mut self) -> io::Result<()>;
     fn enter_alternate(&mut self) -> io::Result<()>;
     fn hide_cursor(&mut self) -> io::Result<()>;
@@ -89,6 +103,49 @@ impl TerminalControl for CrosstermControl {
 
     fn raw_mode_enabled(&mut self) -> io::Result<bool> {
         terminal::is_raw_mode_enabled()
+    }
+
+    fn keyboard_supported(&mut self) -> io::Result<bool> {
+        terminal::supports_keyboard_enhancement()
+    }
+
+    fn enable_mouse(&mut self) -> io::Result<()> {
+        execute!(io::stdout(), EnableMouseCapture)
+    }
+
+    fn disable_mouse(&mut self) -> io::Result<()> {
+        execute!(io::stdout(), DisableMouseCapture)
+    }
+
+    fn enable_paste(&mut self) -> io::Result<()> {
+        execute!(io::stdout(), EnableBracketedPaste)
+    }
+
+    fn disable_paste(&mut self) -> io::Result<()> {
+        execute!(io::stdout(), DisableBracketedPaste)
+    }
+
+    fn enable_focus(&mut self) -> io::Result<()> {
+        execute!(io::stdout(), EnableFocusChange)
+    }
+
+    fn disable_focus(&mut self) -> io::Result<()> {
+        execute!(io::stdout(), DisableFocusChange)
+    }
+
+    fn push_keyboard(&mut self) -> io::Result<()> {
+        execute!(
+            io::stdout(),
+            PushKeyboardEnhancementFlags(
+                KeyboardEnhancementFlags::DISAMBIGUATE_ESCAPE_CODES
+                    | KeyboardEnhancementFlags::REPORT_EVENT_TYPES
+                    | KeyboardEnhancementFlags::REPORT_ALL_KEYS_AS_ESCAPE_CODES
+            )
+        )
+    }
+
+    fn pop_keyboard(&mut self) -> io::Result<()> {
+        execute!(io::stdout(), PopKeyboardEnhancementFlags)
     }
 
     fn enable_raw(&mut self) -> io::Result<()> {
@@ -138,6 +195,10 @@ pub(crate) struct Modes {
     raw_attempted: bool,
     alternate_attempted: bool,
     cursor_attempted: bool,
+    mouse_attempted: bool,
+    paste_attempted: bool,
+    focus_attempted: bool,
+    keyboard_attempted: bool,
 }
 
 impl Modes {
@@ -148,6 +209,10 @@ impl Modes {
             raw_attempted: false,
             alternate_attempted: false,
             cursor_attempted: false,
+            mouse_attempted: false,
+            paste_attempted: false,
+            focus_attempted: false,
+            keyboard_attempted: false,
         }
     }
 
@@ -170,11 +235,45 @@ impl Modes {
         self.control
             .enable_raw()
             .map_err(|e| SessionError::io("enable raw mode", e))?;
+        // Probe in raw mode before starting the sole reader. Crossterm's probe
+        // reads terminal responses and would otherwise race with event polling.
+        if options.enhanced_keyboard
+            && !self
+                .control
+                .keyboard_supported()
+                .map_err(|e| SessionError::io("query enhanced keyboard support", e))?
+        {
+            return Err(SessionError::UnsupportedCapability("enhanced keyboard"));
+        }
         if options.alternate_screen {
             self.alternate_attempted = true;
             self.control
                 .enter_alternate()
                 .map_err(|e| SessionError::io("enter alternate screen", e))?;
+        }
+        if options.mouse_capture {
+            self.mouse_attempted = true;
+            self.control
+                .enable_mouse()
+                .map_err(|e| SessionError::io("enable mouse capture", e))?;
+        }
+        if options.bracketed_paste {
+            self.paste_attempted = true;
+            self.control
+                .enable_paste()
+                .map_err(|e| SessionError::io("enable bracketed paste", e))?;
+        }
+        if options.focus_reporting {
+            self.focus_attempted = true;
+            self.control
+                .enable_focus()
+                .map_err(|e| SessionError::io("enable focus reporting", e))?;
+        }
+        if options.enhanced_keyboard {
+            self.keyboard_attempted = true;
+            self.control
+                .push_keyboard()
+                .map_err(|e| SessionError::io("push keyboard enhancement", e))?;
         }
         self.cursor_attempted = true;
         self.control
@@ -199,6 +298,26 @@ impl Modes {
             return Vec::new();
         }
         let mut failures = Vec::new();
+        if self.keyboard_attempted {
+            cleanup_step(&mut failures, "pop keyboard enhancement", || {
+                self.control.pop_keyboard()
+            });
+        }
+        if self.focus_attempted {
+            cleanup_step(&mut failures, "disable focus reporting", || {
+                self.control.disable_focus()
+            });
+        }
+        if self.paste_attempted {
+            cleanup_step(&mut failures, "disable bracketed paste", || {
+                self.control.disable_paste()
+            });
+        }
+        if self.mouse_attempted {
+            cleanup_step(&mut failures, "disable mouse capture", || {
+                self.control.disable_mouse()
+            });
+        }
         if self.cursor_attempted {
             cleanup_step(&mut failures, "show cursor", || self.control.show_cursor());
         }
@@ -215,7 +334,7 @@ impl Modes {
                 self.control.leave_alternate()
             });
         }
-        if self.cursor_attempted || self.alternate_attempted {
+        if self.raw_attempted {
             cleanup_step(&mut failures, "flush terminal", || self.control.flush());
         }
         if self.raw_attempted {

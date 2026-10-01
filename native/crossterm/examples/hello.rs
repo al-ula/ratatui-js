@@ -18,7 +18,10 @@ const FRAME: &[u8] = br#"{
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let alternate_screen = !std::env::args().any(|arg| arg == "--no-alternate-screen");
-    let session = Session::open(SessionOptions { alternate_screen })?;
+    let session = Session::open(SessionOptions {
+        alternate_screen,
+        ..SessionOptions::default()
+    })?;
     let outcome = (|| {
         session.render_json(FRAME)?;
         loop {
@@ -27,6 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     key: KeyCode::Character { value: 'q' },
                     kind: KeyKind::Press | KeyKind::Repeat,
                     modifiers,
+                    ..
                 }) if modifiers.is_empty() => break,
                 EventPoll::Event(TerminalEvent::Resize { .. }) => {
                     session.render_json(FRAME)?;

@@ -185,5 +185,7 @@ else:
     scenarios = ["keyboard", "no-alternate", "close-wait"]
     if "deno" in sys.argv[1].lower():
         scenarios.append("interrupt")
+    if any("deno.ts" in arg for arg in sys.argv[1:]):
+        scenarios.append("unsupported-keyboard")
     for scenario in scenarios:
         run_scenario(sys.argv[1:], scenario)

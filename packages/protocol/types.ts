@@ -129,7 +129,8 @@ export type ErrorCode =
   | "initialization"
   | "shutdown"
   | "invalidArgument"
-  | "unsupportedAbi";
+  | "unsupportedAbi"
+  | "unsupportedCapability";
 
 export interface ErrorDescription {
   readonly code: ErrorCode;
@@ -145,9 +146,48 @@ export interface CleanupFailure {
   readonly message: string;
 }
 
+export type KeyModifier =
+  | "shift"
+  | "control"
+  | "alt"
+  | "super"
+  | "hyper"
+  | "meta";
+export type KeyState = "keypad" | "capsLock" | "numLock";
+export type MediaKeyCode =
+  | "play"
+  | "pause"
+  | "playPause"
+  | "reverse"
+  | "stop"
+  | "fastForward"
+  | "rewind"
+  | "trackNext"
+  | "trackPrevious"
+  | "record"
+  | "lowerVolume"
+  | "raiseVolume"
+  | "muteVolume";
+export type ModifierKeyCode =
+  | "leftShift"
+  | "leftControl"
+  | "leftAlt"
+  | "leftSuper"
+  | "leftHyper"
+  | "leftMeta"
+  | "rightShift"
+  | "rightControl"
+  | "rightAlt"
+  | "rightSuper"
+  | "rightHyper"
+  | "rightMeta"
+  | "isoLevel3Shift"
+  | "isoLevel5Shift";
 export type KeyCode =
   | { readonly type: "character"; readonly value: string }
   | { readonly type: "function"; readonly value: number }
+  | { readonly type: "media"; readonly value: MediaKeyCode }
+  | { readonly type: "modifier"; readonly value: ModifierKeyCode }
   | {
     readonly type:
       | "enter"
@@ -164,16 +204,46 @@ export type KeyCode =
       | "pageUp"
       | "pageDown"
       | "insert"
-      | "delete";
+      | "delete"
+      | "null"
+      | "capsLock"
+      | "scrollLock"
+      | "numLock"
+      | "printScreen"
+      | "pause"
+      | "menu"
+      | "keypadBegin";
   };
-
+export type MouseButton = "left" | "right" | "middle";
+export type MouseKind =
+  | { readonly type: "down" | "up" | "drag"; readonly button: MouseButton }
+  | {
+    readonly type:
+      | "moved"
+      | "scrollUp"
+      | "scrollDown"
+      | "scrollLeft"
+      | "scrollRight";
+  };
 export type TerminalEvent =
   | {
     readonly type: "key";
     readonly key: KeyCode;
     readonly kind: "press" | "repeat" | "release";
-    readonly modifiers: readonly ("shift" | "control" | "alt" | "super")[];
+    readonly modifiers: readonly KeyModifier[];
+    /** Omitted when no keyboard state was reported. */
+    readonly state?: readonly KeyState[];
   }
+  | {
+    readonly type: "mouse";
+    readonly kind: MouseKind;
+    /** Zero-based terminal cell coordinates. */
+    readonly column: number;
+    readonly row: number;
+    readonly modifiers: readonly KeyModifier[];
+  }
+  | { readonly type: "paste"; readonly text: string }
+  | { readonly type: "focus"; readonly focused: boolean }
   | {
     readonly type: "resize";
     readonly width: number;

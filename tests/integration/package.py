@@ -59,7 +59,7 @@ try {
         const result = await driver.render(frame);
         if (result.width !== 90 || result.height !== 30) throw new Error("Resize failed");
         console.log("PTY_RESIZED\\r");
-      } else if (event.key.type === "character" && event.key.value === "q") break;
+      } else if (event.type === "key" && event.key.type === "character" && event.key.value === "q") break;
       event = await nextInputEvent();
     }
   }

@@ -8,14 +8,15 @@ for the public header and cross-language ownership contract.
 ## Goals and scope
 
 - Render the existing protocol on a real terminal using Crossterm.
-- Read normalized keyboard and resize events without blocking rendering.
+- Read normalized key, resize, mouse, paste, and focus events without blocking
+  rendering.
 - Make terminal ownership, partial initialization, and shutdown explicit.
 - Keep the existing headless renderer and fixtures independent of terminal I/O.
 - Support Linux, macOS, and Windows as a design goal; claim support only after
   each platform passes lifecycle and integration tests.
 
-No runtime backend selection, JS callbacks from Rust, application loop, mouse,
-paste, focus events, or custom terminal parser is included in this milestone.
+Runtime backend selection, JS callbacks from Rust, and custom terminal parsing
+remain outside this backend. The application loop lives in the TS core package.
 
 ## Backend choice and crate boundaries
 
@@ -58,10 +59,11 @@ execute blocking calls without blocking their runtime:
 | `poll_event(timeout)` | Return `Event`, `Timeout`, or `Closed`, or an error              |
 | `close()`             | Stop input, finish admitted rendering, restore terminal settings |
 
-Only `alternateScreen` is configurable initially, defaulting to true, matching
-`TerminalOptions`. Queue capacity and reader polling interval are internal
-constants, not public API. Capabilities advertise keyboard and resize support,
-not guaranteed support for every modifier or key-event kind.
+`alternateScreen` defaults to true. `mouseCapture`, `bracketedPaste`,
+`focusReporting`, and `enhancedKeyboard` are opt-in booleans, defaulting to
+false, matching `TerminalOptions`. Queue capacity and reader polling interval
+are internal constants. Capabilities report basic keyboard/resize support and
+enabled input modes; delivery still depends on the terminal and platform.
 
 Session errors are separate from core frame errors. Required categories include
 terminal busy, invalid options, session closed, concurrent event wait, terminal
@@ -87,13 +89,15 @@ Opening proceeds in this order:
 
 1. Validate options and terminal availability; claim ownership.
 2. Enable raw mode.
-3. Enter alternate screen if requested, hide the cursor, reset
-   attributes/colors, and clear the display. Ratatui initializes blank diff
-   buffers but does not clear existing physical screen contents; opening
+3. Probe enhanced keyboard support if requested, before starting the reader.
+   Reject unsupported terminals and roll back raw mode on query failure.
+4. Enter alternate screen and enable requested input modes, hide the cursor,
+   reset attributes/colors, and clear the display. Ratatui initializes blank
+   diff buffers but does not clear existing physical screen contents; opening
    establishes that baseline.
-4. Create the renderer and its initial terminal buffers.
-5. Start the sole input-reader thread.
-6. Publish the open session to the caller.
+5. Create the renderer and its initial terminal buffers.
+6. Start the sole input-reader thread.
+7. Publish the open session to the caller.
 
 Use explicit Crossterm operations instead of `ratatui::init()` or `try_init()`.
 The shared library must not install its own process-wide panic hook or
@@ -161,11 +165,18 @@ Normalize only events expressible by `TerminalEvent`:
 - Preserve supported character/function/named keys, kinds, and modifiers.
 - Preserve resize dimensions; actual drawing dimensions come from
   `RenderResult`.
-- Ignore unsupported event variants and unmappable key codes rather than
-  inventing protocol values. Test the mapping explicitly.
-- Do not enable mouse, paste, focus, or enhanced keyboard modes initially.
+- Preserve all Crossterm key codes, including distinct media/modifier codes;
+  preserve hyper/meta modifiers and keypad/lock state. Ignore unknown flag bits
+  as an entire event rather than stripping information from it.
+- Preserve paste text verbatim, focus state, and mouse kind, button,
+  coordinates, and modifiers. Test serialization against shared TS fixtures.
+- Enable additional input modes only when requested. Probe keyboard support
+  before the reader starts; push flags 11 and pop them before leaving the
+  alternate screen. Disable mouse/paste/focus during rollback and close.
   Press/repeat/release availability depends on the terminal and platform;
-  ordinary keyboard support does not promise release events.
+  ordinary keyboard support does not promise release events. See the
+  [input contract](protocol.md#input-contract) for ownership and platform
+  limits.
 
 Event polling claims the single-wait flag under the state/event mutex and
 releases it on every exit, including failures. A second outstanding poll returns

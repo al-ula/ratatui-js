@@ -24,6 +24,10 @@ fn real_terminal_lifecycle() {
         .arg("-c")
         .arg(include_str!("terminal_pty.py"))
         .arg(std::env::current_exe().unwrap())
+        .arg(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../tests/fixtures/extended-input.json"
+        ))
         .output()
         .expect("python3 is required for PTY tests");
     assert!(
@@ -51,9 +55,39 @@ fn pty_child() {
         terminal::disable_raw_mode().unwrap();
         return;
     }
+    if scenario == "unsupported-keyboard" || scenario == "keyboard-probe-timeout" {
+        let error = match Session::open(SessionOptions {
+            enhanced_keyboard: true,
+            ..SessionOptions::default()
+        }) {
+            Ok(_) => panic!("unsupported negotiation unexpectedly succeeded"),
+            Err(error) => error,
+        };
+        if scenario == "unsupported-keyboard" {
+            assert!(matches!(error, SessionError::UnsupportedCapability(_)));
+        } else {
+            assert!(matches!(
+                error,
+                SessionError::Io {
+                    operation: "query enhanced keyboard support",
+                    ..
+                }
+            ));
+        }
+        assert!(!terminal::is_raw_mode_enabled().unwrap());
+        let recovered = Session::open(SessionOptions::default()).unwrap();
+        recovered.render_json(FRAME).unwrap();
+        recovered.close().unwrap();
+        return;
+    }
+    let extended = scenario.starts_with("extended");
     let session = Arc::new(
         Session::open(SessionOptions {
             alternate_screen: scenario != "no-alternate",
+            mouse_capture: extended,
+            bracketed_paste: extended,
+            focus_reporting: extended,
+            enhanced_keyboard: extended,
         })
         .unwrap(),
     );
@@ -66,6 +100,26 @@ fn pty_child() {
     let initial = session.render_json(FRAME).unwrap();
     assert_eq!((initial.width, initial.height), (80, 24));
 
+    if extended {
+        println!("PTY_READY\r");
+        let fixture: serde_json::Value =
+            serde_json::from_str(include_str!("../../../tests/fixtures/extended-input.json"))
+                .unwrap();
+        for expected in fixture["events"].as_array().unwrap() {
+            let EventPoll::Event(event) = session.poll_event(Duration::from_secs(5)).unwrap()
+            else {
+                panic!("missing extended event");
+            };
+            assert_eq!(&serde_json::to_value(event).unwrap(), expected);
+        }
+        if scenario == "extended-drop" {
+            drop(session);
+        } else {
+            session.close().unwrap();
+        }
+        assert!(!terminal::is_raw_mode_enabled().unwrap());
+        return;
+    }
     if scenario == "close-wait" {
         let waiting = Arc::clone(&session);
         let consumer = thread::spawn(move || waiting.poll_event(Duration::from_secs(60)));
@@ -106,6 +160,7 @@ fn pty_child() {
                     key: KeyCode::Character { value: 'q' },
                     kind: KeyKind::Press,
                     modifiers,
+                    ..
                 }) => {
                     assert!(modifiers.is_empty());
                     break;

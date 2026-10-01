@@ -1,0 +1,1332 @@
+[
+  {
+    "type": "resize",
+    "width": 65535,
+    "height": 0
+  },
+  {
+    "type": "focus",
+    "focused": true
+  },
+  {
+    "type": "focus",
+    "focused": false
+  },
+  {
+    "type": "paste",
+    "text": "界\n\t\u001b😀"
+  },
+  {
+    "type": "paste",
+    "text": ""
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "enter"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "escape"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "backspace"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "tab"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "backTab"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "left"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "right"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "up"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "down"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "home"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "end"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "pageUp"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "pageDown"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "insert"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "delete"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "null"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "capsLock"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "scrollLock"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "numLock"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "printScreen"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "pause"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "menu"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "keypadBegin"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "character",
+      "value": "😀"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "function",
+      "value": 255
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "play"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "pause"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "playPause"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "reverse"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "stop"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "fastForward"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "rewind"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "trackNext"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "trackPrevious"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "record"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "lowerVolume"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "raiseVolume"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "media",
+      "value": "muteVolume"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "leftShift"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "leftControl"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "leftAlt"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "leftSuper"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "leftHyper"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "leftMeta"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "rightShift"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "rightControl"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "rightAlt"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "rightSuper"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "rightHyper"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "rightMeta"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "isoLevel3Shift"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "modifier",
+      "value": "isoLevel5Shift"
+    },
+    "kind": "press",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "character",
+      "value": "😀"
+    },
+    "kind": "repeat",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "key",
+    "key": {
+      "type": "character",
+      "value": "😀"
+    },
+    "kind": "release",
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ],
+    "state": [
+      "keypad",
+      "capsLock",
+      "numLock"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "down",
+      "button": "left"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "down",
+      "button": "right"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "down",
+      "button": "middle"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "up",
+      "button": "left"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "up",
+      "button": "right"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "up",
+      "button": "middle"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "drag",
+      "button": "left"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "drag",
+      "button": "right"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "drag",
+      "button": "middle"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": [
+      "shift",
+      "control",
+      "alt",
+      "super",
+      "hyper",
+      "meta"
+    ]
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "moved"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": []
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "scrollUp"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": []
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "scrollDown"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": []
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "scrollLeft"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": []
+  },
+  {
+    "type": "mouse",
+    "kind": {
+      "type": "scrollRight"
+    },
+    "column": 0,
+    "row": 65535,
+    "modifiers": []
+  }
+]

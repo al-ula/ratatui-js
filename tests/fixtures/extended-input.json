@@ -1,0 +1,120 @@
+{
+  "input": "\u001b[I\u001b[O\u001b[200~界\n\t\u001bZ😀\u001b[201~\u001b[200~\u001b[201~\u001b[<0;4;5M\u001b[<32;4;5M\u001b[<0;4;5m\u001b[<35;4;5M\u001b[<64;4;5M\u001b[<65;4;5M\u001b[<66;4;5M\u001b[<67;4;5M\u001b[113;49:2u\u001b[113;49:3u",
+  "events": [
+    {
+      "type": "focus",
+      "focused": true
+    },
+    {
+      "type": "focus",
+      "focused": false
+    },
+    {
+      "type": "paste",
+      "text": "界\n\t\u001bZ😀"
+    },
+    {
+      "type": "paste",
+      "text": ""
+    },
+    {
+      "type": "mouse",
+      "kind": {
+        "type": "down",
+        "button": "left"
+      },
+      "column": 3,
+      "row": 4,
+      "modifiers": []
+    },
+    {
+      "type": "mouse",
+      "kind": {
+        "type": "drag",
+        "button": "left"
+      },
+      "column": 3,
+      "row": 4,
+      "modifiers": []
+    },
+    {
+      "type": "mouse",
+      "kind": {
+        "type": "up",
+        "button": "left"
+      },
+      "column": 3,
+      "row": 4,
+      "modifiers": []
+    },
+    {
+      "type": "mouse",
+      "kind": {
+        "type": "moved"
+      },
+      "column": 3,
+      "row": 4,
+      "modifiers": []
+    },
+    {
+      "type": "mouse",
+      "kind": {
+        "type": "scrollUp"
+      },
+      "column": 3,
+      "row": 4,
+      "modifiers": []
+    },
+    {
+      "type": "mouse",
+      "kind": {
+        "type": "scrollDown"
+      },
+      "column": 3,
+      "row": 4,
+      "modifiers": []
+    },
+    {
+      "type": "mouse",
+      "kind": {
+        "type": "scrollLeft"
+      },
+      "column": 3,
+      "row": 4,
+      "modifiers": []
+    },
+    {
+      "type": "mouse",
+      "kind": {
+        "type": "scrollRight"
+      },
+      "column": 3,
+      "row": 4,
+      "modifiers": []
+    },
+    {
+      "type": "key",
+      "key": {
+        "type": "character",
+        "value": "q"
+      },
+      "kind": "repeat",
+      "modifiers": [
+        "hyper",
+        "meta"
+      ]
+    },
+    {
+      "type": "key",
+      "key": {
+        "type": "character",
+        "value": "q"
+      },
+      "kind": "release",
+      "modifiers": [
+        "hyper",
+        "meta"
+      ]
+    }
+  ]
+}

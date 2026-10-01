@@ -16,6 +16,11 @@ extern "C" {
 #define RT_CLOSED 2u
 #define RT_ERROR 3u
 #define RT_ALTERNATE_SCREEN 1u
+#define RT_MOUSE_CAPTURE 2u
+#define RT_BRACKETED_PASTE 4u
+#define RT_FOCUS_REPORTING 8u
+/* Probe support; unsupported terminals fail creation instead of downgrading. */
+#define RT_ENHANCED_KEYBOARD 16u
 typedef struct RtSession RtSession;
 typedef struct { uint8_t *data; size_t len; } RtBytes;
 /* All output arguments are required, aligned, writable, and disjoint. They

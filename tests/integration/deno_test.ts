@@ -5,9 +5,21 @@ Deno.test("missing library and invalid options reject", async () => {
   await assertRejects(() =>
     new DenoAdapter(new URL("missing.so", root)).open({})
   );
-  await assertRejects(() =>
-    new DenoAdapter("unused").open({ alternateScreen: 1 as unknown as boolean })
-  );
+  for (
+    const name of [
+      "alternateScreen",
+      "mouseCapture",
+      "bracketedPaste",
+      "focusReporting",
+      "enhancedKeyboard",
+    ]
+  ) {
+    await assertRejects(
+      () => new DenoAdapter("unused").open({ [name]: 1 }),
+      TypeError,
+      `${name} must be boolean`,
+    );
+  }
 });
 for (
   const [name, code] of [["abi", "unsupportedAbi"], [
@@ -54,7 +66,12 @@ Deno.test("malformed results free buffers and shutdown reports restoration error
     ? "dylib"
     : "so";
   const driver = await new DenoAdapter(new URL(`failures.${extension}`, root))
-    .open({});
+    .open({
+      mouseCapture: true,
+      bracketedPaste: true,
+      focusReporting: true,
+      enhancedKeyboard: true,
+    });
   await assertRejects(
     () =>
       driver.render({
@@ -70,6 +87,17 @@ Deno.test("malformed results free buffers and shutdown reports restoration error
   );
   const error = await assertRejects(() => driver.close(), AggregateError);
   assertEquals(error.errors[0].description.code, "shutdown");
+  assertEquals(
+    error.errors[0].description.cleanup.map((failure: { operation: string }) =>
+      failure.operation
+    ),
+    [
+      "pop keyboard enhancement",
+      "disable focus reporting",
+      "disable bracketed paste",
+      "disable mouse capture",
+    ],
+  );
   const repeated = await assertRejects(() => driver.close(), AggregateError);
   assertEquals(repeated, error);
   const poisoned = await assertRejects(

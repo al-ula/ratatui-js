@@ -19,6 +19,7 @@ const codes = new Set([
   "shutdown",
   "invalidArgument",
   "unsupportedAbi",
+  "unsupportedCapability",
 ]);
 function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -83,28 +84,103 @@ export function decodeRenderResult(value: unknown): RenderResult {
   }
   return value as RenderResult;
 }
+function flags(value: unknown, allowed: readonly string[], name: string): void {
+  if (
+    !Array.isArray(value) || value.some((item) => !allowed.includes(item)) ||
+    new Set(value).size !== value.length
+  ) {
+    throw new TypeError(`Invalid ${name}`);
+  }
+}
+const modifiers = ["shift", "control", "alt", "super", "hyper", "meta"];
+
 export function decodeEvent(value: unknown): TerminalEvent {
   const event = record(value);
   if (event.type === "resize") {
     integer(event.width);
     integer(event.height);
-  } else if (event.type === "key") {
+  } else if (event.type === "paste") {
     if (
-      !["press", "repeat", "release"].includes(event.kind as string) ||
-      !Array.isArray(event.modifiers) ||
-      event.modifiers.some((item) =>
-        !["shift", "control", "alt", "super"].includes(item)
-      )
+      typeof event.text !== "string" ||
+      /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/u
+        .test(event.text)
     ) {
+      throw new TypeError("Invalid paste text");
+    }
+  } else if (event.type === "focus") {
+    if (typeof event.focused !== "boolean") {
+      throw new TypeError("Invalid focus event");
+    }
+  } else if (event.type === "mouse") {
+    integer(event.column);
+    integer(event.row);
+    flags(event.modifiers, modifiers, "mouse modifiers");
+    const kind = record(event.kind);
+    if (["down", "up", "drag"].includes(kind.type as string)) {
+      if (!["left", "right", "middle"].includes(kind.button as string)) {
+        throw new TypeError("Invalid mouse button");
+      }
+    } else if (
+      !["moved", "scrollUp", "scrollDown", "scrollLeft", "scrollRight"]
+        .includes(kind.type as string) || kind.button !== undefined
+    ) {
+      throw new TypeError("Invalid mouse kind");
+    }
+  } else if (event.type === "key") {
+    if (!["press", "repeat", "release"].includes(event.kind as string)) {
       throw new TypeError("Invalid key event");
+    }
+    flags(event.modifiers, modifiers, "key modifiers");
+    if (event.state !== undefined) {
+      flags(event.state, ["keypad", "capsLock", "numLock"], "key state");
     }
     const key = record(event.key);
     if (key.type === "character") {
-      if (typeof key.value !== "string" || [...key.value].length !== 1) {
+      if (
+        typeof key.value !== "string" || [...key.value].length !== 1 ||
+        /^[\uD800-\uDFFF]$/u.test(key.value)
+      ) {
         throw new TypeError("Invalid key character");
       }
     } else if (key.type === "function") {
       integer(key.value, 255);
+    } else if (key.type === "media") {
+      if (
+        ![
+          "play",
+          "pause",
+          "playPause",
+          "reverse",
+          "stop",
+          "fastForward",
+          "rewind",
+          "trackNext",
+          "trackPrevious",
+          "record",
+          "lowerVolume",
+          "raiseVolume",
+          "muteVolume",
+        ].includes(key.value as string)
+      ) throw new TypeError("Invalid media key");
+    } else if (key.type === "modifier") {
+      if (
+        ![
+          "leftShift",
+          "leftControl",
+          "leftAlt",
+          "leftSuper",
+          "leftHyper",
+          "leftMeta",
+          "rightShift",
+          "rightControl",
+          "rightAlt",
+          "rightSuper",
+          "rightHyper",
+          "rightMeta",
+          "isoLevel3Shift",
+          "isoLevel5Shift",
+        ].includes(key.value as string)
+      ) throw new TypeError("Invalid modifier key");
     } else if (
       ![
         "enter",
@@ -122,6 +198,14 @@ export function decodeEvent(value: unknown): TerminalEvent {
         "pageDown",
         "insert",
         "delete",
+        "null",
+        "capsLock",
+        "scrollLock",
+        "numLock",
+        "printScreen",
+        "pause",
+        "menu",
+        "keypadBegin",
       ].includes(key.type as string)
     ) {
       throw new TypeError("Invalid key code");

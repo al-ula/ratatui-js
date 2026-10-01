@@ -96,12 +96,29 @@ export class DenoAdapter implements PlatformAdapter {
   }
 
   async #open(options: TerminalOptions): Promise<TerminalDriver> {
-    if (
-      options.alternateScreen !== undefined &&
-      typeof options.alternateScreen !== "boolean"
+    for (
+      const name of [
+        "alternateScreen",
+        "mouseCapture",
+        "bracketedPaste",
+        "focusReporting",
+        "enhancedKeyboard",
+      ] as const
     ) {
-      throw new TypeError("alternateScreen must be boolean");
+      if (options[name] !== undefined && typeof options[name] !== "boolean") {
+        throw new TypeError(`${name} must be boolean`);
+      }
     }
+    // Snapshot options before awaiting permission queries or native loading.
+    const modes = {
+      mouse: options.mouseCapture === true,
+      paste: options.bracketedPaste === true,
+      focus: options.focusReporting === true,
+      enhancedKeyboard: options.enhancedKeyboard === true,
+    };
+    const flags = (options.alternateScreen === false ? 0 : 1) |
+      (modes.mouse ? 2 : 0) | (modes.paste ? 4 : 0) | (modes.focus ? 8 : 0) |
+      (modes.enhancedKeyboard ? 16 : 0);
     // Deno pointer inspection requires unrestricted FFI permission, even when
     // dlopen itself is permitted for a specific path. Check before raw mode.
     if ((await Deno.permissions.query({ name: "ffi" })).state !== "granted") {
@@ -154,7 +171,7 @@ export class DenoAdapter implements PlatformAdapter {
       const status = await library.symbols.rt_create(
         ABI_VERSION,
         PROTOCOL_VERSION,
-        options.alternateScreen === false ? 0 : 1,
+        flags,
         storage,
         error,
       );
@@ -162,7 +179,7 @@ export class DenoAdapter implements PlatformAdapter {
       const result = takeBytes(library, error);
       checkStatus(status, result, [0]);
       if (!handle) throw new TypeError("Native create returned no handle");
-      return new DenoDriver(library, handle, native);
+      return new DenoDriver(library, handle, native, modes);
     } catch (failure) {
       // A malformed successful create must still release any returned handle.
       const failures: unknown[] = [failure];
@@ -235,11 +252,7 @@ function checkStatus(
 }
 
 class DenoDriver implements TerminalDriver {
-  readonly capabilities = {
-    protocolVersion: PROTOCOL_VERSION,
-    keyboard: true,
-    resize: true,
-  };
+  readonly capabilities;
   #closing = false;
   #close: Promise<void> | undefined;
   #renders: Promise<unknown> = Promise.resolve();
@@ -248,7 +261,20 @@ class DenoDriver implements TerminalDriver {
     readonly library: Library,
     readonly handle: Deno.PointerValue,
     readonly native: NativeLibrary | undefined,
-  ) {}
+    modes: {
+      mouse: boolean;
+      paste: boolean;
+      focus: boolean;
+      enhancedKeyboard: boolean;
+    },
+  ) {
+    this.capabilities = {
+      protocolVersion: PROTOCOL_VERSION,
+      keyboard: true,
+      resize: true,
+      ...modes,
+    };
+  }
 
   render(frame: FrameDescription): Promise<RenderResult> {
     if (this.#closing) {

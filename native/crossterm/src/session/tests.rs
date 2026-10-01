@@ -85,11 +85,20 @@ fn repeated_and_concurrent_close_restore_once_and_preserve_the_error_outcome() {
 
 #[test]
 fn renderer_and_reader_creation_failures_roll_back_modes() {
-    for reader_failure in [false, true] {
-        let control = Arc::new(Mutex::new(MockState::default()));
+    for (reader_failure, extended) in [(false, false), (true, false), (false, true), (true, true)] {
+        let control = Arc::new(Mutex::new(MockState {
+            keyboard_supported: true,
+            ..MockState::default()
+        }));
         let slot = Arc::new(Mutex::new(Ownership::Free));
         let result = SessionInner::open(
-            SessionOptions::default(),
+            SessionOptions {
+                mouse_capture: extended,
+                bracketed_paste: extended,
+                focus_reporting: extended,
+                enhanced_keyboard: extended,
+                ..SessionOptions::default()
+            },
             Box::new(MockControl(Arc::clone(&control))),
             OwnerGuard::acquire(Arc::clone(&slot)).unwrap(),
             || {
@@ -104,6 +113,14 @@ fn renderer_and_reader_creation_failures_roll_back_modes() {
         assert!(result.is_err());
         assert!(lock(&control).calls.contains(&"disable raw mode"));
         assert!(lock(&control).calls.contains(&"leave alternate screen"));
+        for operation in [
+            "disable mouse capture",
+            "disable bracketed paste",
+            "disable focus reporting",
+            "pop keyboard enhancement",
+        ] {
+            assert_eq!(lock(&control).calls.contains(&operation), extended);
+        }
         assert_eq!(*lock(&slot), Ownership::Free);
     }
 }

@@ -98,5 +98,9 @@
   {
     "code": "unsupportedAbi",
     "message": "unsupportedAbi"
+  },
+  {
+    "code": "unsupportedCapability",
+    "message": "terminal does not support enhanced keyboard"
   }
 ]

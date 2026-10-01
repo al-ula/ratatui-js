@@ -22,6 +22,8 @@ pub enum SessionError {
     NotTerminal,
     #[error("Crossterm raw mode is already enabled by another owner")]
     RawModeActive,
+    #[error("terminal does not support {0}")]
+    UnsupportedCapability(&'static str),
     #[error("{operation}: {message}")]
     Io {
         operation: &'static str,
@@ -102,6 +104,7 @@ impl SessionError {
             Self::TerminalPoisoned => "terminalPoisoned",
             Self::NotTerminal => "notTerminal",
             Self::RawModeActive => "rawModeActive",
+            Self::UnsupportedCapability(_) => "unsupportedCapability",
             Self::Io { .. } => "io",
             Self::Frame(error) => {
                 let frame = error.description();

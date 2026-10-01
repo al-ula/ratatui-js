@@ -2,8 +2,8 @@
 
 Native Crossterm sessions for the existing ratatui-js JSON rendering protocol.
 This is a Rust library, not the future C ABI or Deno adapter. Linux
-real-terminal behavior is verified with PTYs; macOS and Windows have not been
-verified.
+extended-input behavior is verified with PTYs; extended input on macOS and
+Windows has not yet been verified.
 
 ## API
 
@@ -24,16 +24,26 @@ begins are rejected. Output I/O failure or render panic disables future
 rendering until close; invalid frames do not.
 
 The bounded input queue preserves FIFO events with interruptible backpressure.
-Unsupported events, key codes, and unrepresentable modifiers are ignored.
-Ordinary keyboard support does not guarantee repeat/release events. Mouse,
-paste, focus, and enhanced keyboard modes are not enabled.
+Key, resize, mouse, paste, and focus events preserve their native meaning;
+unknown modifier/state bits cause the entire event to be ignored.
+`SessionOptions` offers opt-in `mouse_capture`, `bracketed_paste`,
+`focus_reporting`, and `enhanced_keyboard` booleans, all false by default.
+Enhanced keyboard mode probes support before starting input; unsupported
+terminals reject opening, and query errors roll back raw mode. The keyboard flag
+stack is pushed and popped; other requested input modes are disabled on shutdown
+or initialization rollback. Ordinary keyboard support does not guarantee
+repeat/release events. Crossterm does not support enhanced keyboard negotiation
+on Windows. See the [input contract](../../docs/protocol.md#input-contract) for
+event shapes and platform behavior.
 
 ## Ownership and cleanup
 
 Only one session per loaded library instance may own the terminal. The host must
 not concurrently read terminal input or alter its modes; independently loaded
 libraries cannot be coordinated by this ownership guard. Existing Crossterm raw
-mode is rejected rather than borrowed.
+mode is rejected rather than borrowed. Mouse, paste, and focus modes must
+initially be disabled by the host; there is no portable prior-state query.
+Pre-existing enhanced keyboard flags are preserved with a push/pop pair.
 
 Explicitly close on both success and failure paths to observe cleanup errors.
 `Drop` is a best-effort fallback. No global panic hook, interrupt handler, or

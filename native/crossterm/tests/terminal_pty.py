@@ -1,5 +1,7 @@
 """Unix real-terminal lifecycle tests for the Rust child fixture."""
 
+import json
+from pathlib import Path
 import errno
 import fcntl
 import os
@@ -63,6 +65,8 @@ def run_scenario(executable, scenario):
             preexec_fn=prepare_terminal,
         )
         deadline = time.monotonic() + 10
+        answered_probe = False
+        sent_extended = False
         sent_resize = False
         sent_quit = False
         while True:
@@ -77,6 +81,18 @@ def run_scenario(executable, scenario):
                     chunk = b""
                 output.extend(chunk)
 
+            if not answered_probe and b"\x1b[?u\x1b[c" in output:
+                if scenario.startswith("extended"):
+                    # Emulate a terminal with pre-existing keyboard flags. The
+                    # session must push/pop a level, preserving those flags.
+                    os.write(master, b"\x1b[?5u\x1b[?1;2c")
+                elif scenario == "unsupported-keyboard":
+                    os.write(master, b"\x1b[?1;2c")
+                answered_probe = True
+            if scenario.startswith("extended") and b"PTY_READY" in output and not sent_extended:
+                fixture = json.loads(Path(sys.argv[2]).read_text())
+                os.write(master, fixture["input"].encode("utf-8"))
+                sent_extended = True
             if scenario == "keyboard" and b"PTY_READY" in output and not sent_resize:
                 fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 30, 90, 0, 0))
                 sent_resize = True
@@ -108,6 +124,23 @@ def run_scenario(executable, scenario):
             assert output.index(b"\x1b[2J") < output.index(b"\x1b[1;1HPTY"), (
                 f"{scenario}: existing display was not cleared before first draw"
             )
+        extended = scenario.startswith("extended")
+        for mode in (1000, 1002, 1003, 1015, 1006, 2004, 1004):
+            enabled = f"\x1b[?{mode}h".encode()
+            disabled = f"\x1b[?{mode}l".encode()
+            assert (enabled in output) == extended, f"{scenario}: mode {mode} enable"
+            assert (disabled in output) == extended, f"{scenario}: mode {mode} cleanup"
+            if extended:
+                assert output.index(enabled) < output.index(disabled)
+                assert output.count(disabled) == 1
+        assert (b"\x1b[>11u" in output) == extended, f"{scenario}: keyboard push"
+        assert (b"\x1b[<1u" in output) == extended, f"{scenario}: keyboard pop"
+        if extended:
+            assert sent_extended and answered_probe
+            assert output.count(b"\x1b[<1u") == 1
+            assert output.index(b"\x1b[<1u") < output.index(b"\x1b[?1049l")
+        if scenario in ("unsupported-keyboard", "keyboard-probe-timeout"):
+            assert answered_probe, "support query was not exercised"
         alternate_expected = scenario not in ("no-alternate", "raw-active")
         assert (b"\x1b[?1049h" in output) == alternate_expected
         assert (b"\x1b[?1049l" in output) == alternate_expected
@@ -125,5 +158,5 @@ def run_scenario(executable, scenario):
 
 
 if __name__ == "__main__":
-    for scenario in ("keyboard", "no-alternate", "close-wait", "drop", "raw-active"):
+    for scenario in ("keyboard", "no-alternate", "close-wait", "drop", "raw-active", "extended", "extended-drop", "unsupported-keyboard", "keyboard-probe-timeout"):
         run_scenario(sys.argv[1], scenario)

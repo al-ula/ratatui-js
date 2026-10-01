@@ -95,23 +95,74 @@ validation.
 
 ## Input contract
 
-TS types define normalized key and resize events for the upcoming adapters.
-`native/crossterm` reads these events for Rust callers and serializes the same
-event shape. Key events contain a structured key code, press/repeat/release
-kind, and modifiers; availability depends on the terminal and platform. Events
-or key codes/modifiers outside this contract are ignored rather than
-misrepresented. Mouse, paste, focus, and enhanced keyboard-mode negotiation are
-deferred.
+`packages/protocol/types.ts` and `native/crossterm/src/events.rs` define
+normalized key, resize, mouse, paste, and focus events. `decodeEvent` validates
+native payloads at the adapter boundary. Shared serialization fixtures live in
+`tests/fixtures/events.json`.
+
+- Key events have `{type: "key", key, kind, modifiers, state?}`. `kind` is
+  `press`, `repeat`, or `release`; it is preserved without converting release or
+  repeat to press. Character values are exactly one Unicode scalar; function
+  values are unsigned 8-bit integers. Named keys include null, lock keys, print
+  screen, pause, menu, and keypad begin. Media and modifier keys use
+  `{type: "media" | "modifier", value: "…"}` with the distinct values in the TS
+  schema; left/right modifiers and media pause remain distinct.
+- Modifiers are `shift`, `control`, `alt`, `super`, `hyper`, and `meta`.
+  Optional key `state` reports `keypad`, `capsLock`, and `numLock`; it is
+  omitted when empty. Unknown native flag bits cause the entire event to be
+  ignored, so a modified key is never delivered as an unrelated plain shortcut.
+- Mouse events have `{type: "mouse", kind, column, row, modifiers}`. Coordinates
+  are zero-based unsigned 16-bit terminal cell positions. `kind` is
+  `{type: "down" | "up" | "drag", button: "left" | "right" | "middle"}` or
+  `{type: "moved" | "scrollUp" | "scrollDown" | "scrollLeft" | "scrollRight"}`.
+- Paste events have `{type: "paste", text}`. Text is preserved verbatim,
+  including newlines, tabs, escape characters, Unicode, and empty strings.
+  Applications must sanitize pasted text before placing it in a frame, whose
+  text validation rejects control characters.
+- Focus events have `{type: "focus", focused: boolean}`. Resize events retain
+  `{type: "resize", width, height}`.
+
+`mouseCapture`, `bracketedPaste`, `focusReporting`, and `enhancedKeyboard` are
+opt-in boolean terminal options, defaulting to false. Mouse, paste, and focus
+requests use Crossterm's terminal commands; event delivery depends on terminal
+support. Incoming supported events are normalized even when the corresponding
+mode was not requested (for example, Windows can report focus by default).
+
+`enhancedKeyboard: true` requires progressive keyboard protocol support. The
+session probes after enabling raw mode and before starting its sole input
+reader. Unsupported terminals reject opening with `unsupportedCapability`; probe
+I/O failures and timeouts reject with `io`. No silent downgrade occurs.
+Supported sessions push escape disambiguation, event-type reporting, and all-key
+escape reporting (flags 11), then pop that level before leaving the alternate
+screen on close or rollback. Alternate-key and associated-text reporting are not
+requested, avoiding Crossterm's alternate-code substitution and unsupported
+associated text. Basic keyboard support does not promise repeat/release events;
+Windows reports event kinds without enhanced mode, and Crossterm's enhanced-mode
+negotiation is unsupported on Windows.
+
+All attempted mode changes are tracked for initialization rollback and shutdown,
+including partially failed writes. Mouse/paste/focus are disabled again,
+keyboard flags are popped, and raw mode is restored. The caller must exclusively
+own terminal modes and leave mouse/paste/focus disabled before opening; these
+modes have no portable prior-state query. A pre-existing keyboard flag level is
+preserved by the push/pop pair. Every applicable cleanup step runs even after
+another step fails; failed restoration poisons ownership. Deno capabilities
+`mouse`, `paste`, `focus`, and `enhancedKeyboard` indicate which modes the
+session enabled; the first three do not guarantee that the terminal will emit
+events. ABI and rendering protocol versions remain 1: the new creation flags and
+event variants extend the existing contract, and older libraries reject new
+flags. Applications matching input events should handle the complete
+`TerminalEvent` union.
 
 ## Lifecycle errors
 
 Errors use `{code, message, path?, operation?, cause?, cleanup?}`. Frame codes
 `invalidJson`, `invalidFrame`, `unsupportedProtocol`, and `io` retain their
 field paths. Lifecycle codes are `terminalBusy`, `terminalPoisoned`,
-`notTerminal`, `rawModeActive`, `closed`, `renderingFailed`,
-`concurrentEventWait`, `invalidTimeout`, `input`, `panic`, `initialization`, and
-`shutdown`. ABI boundary errors additionally use `invalidArgument` and
-`unsupportedAbi`.
+`notTerminal`, `rawModeActive`, `unsupportedCapability`, `closed`,
+`renderingFailed`, `concurrentEventWait`, `invalidTimeout`, `input`, `panic`,
+`initialization`, and `shutdown`. ABI boundary errors additionally use
+`invalidArgument` and `unsupportedAbi`.
 
 `initialization` includes its original structured `cause` and every rollback
 failure in `cleanup`. `shutdown` includes all cleanup failures. Each cleanup

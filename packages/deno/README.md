@@ -23,6 +23,36 @@ before session creation. Pointer inspection requires unrestricted `--allow-ffi`;
 path-restricted FFI permission is rejected before terminal modes change. A
 native library is trusted executable code.
 
+Enable additional input modes when opening:
+
+```ts
+const driver = await new DenoAdapter(libraryPath).open({
+  mouseCapture: true,
+  bracketedPaste: true,
+  focusReporting: true,
+  enhancedKeyboard: true,
+});
+```
+
+These options default to false. `enhancedKeyboard` requires a successful
+terminal support probe and rejects unsupported terminals with
+`NativeError.description.code === "unsupportedCapability"`; a probe timeout
+returns `io`. Crossterm does not support enhanced-mode negotiation on Windows.
+The other modes depend on terminal support and may emit no events. Capabilities
+`mouse`, `paste`, `focus`, and `enhancedKeyboard` indicate enabled modes.
+`nextEvent()` returns the complete key/resize/mouse/paste/focus union; check
+`event.type` before accessing its fields. Paste text is preserved verbatim and
+must be sanitized before putting it into a frame.
+
+Requested modes are restored on close and initialization failure. Leave
+mouse/paste/focus modes disabled before opening and give the session exclusive
+ownership of terminal modes. Pre-existing enhanced keyboard flags are preserved
+with a push/pop pair. See
+[the input contract](../../docs/protocol.md#input-contract) for exact payloads
+and limitations. Linux PTYs cover extended event delivery, mode cleanup,
+unsupported support responses, and negotiation timeouts; these new cases have
+not yet been verified on macOS or Windows.
+
 One event wait is allowed. Native timeouts retry; closed sessions return `null`.
 Rendering is serialized and snapshots the frame before queuing. Close wakes
 polling before awaiting active operations, destroys the session, then unloads

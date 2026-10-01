@@ -110,11 +110,15 @@ pub unsafe extern "C" fn rt_create(
                 "unsupported protocol version",
             )));
         }
-        if flags & !1 != 0 {
+        if flags & !31 != 0 {
             return Err(invalid("unknown session flags"));
         }
         let session = Session::open(SessionOptions {
             alternate_screen: flags & 1 != 0,
+            mouse_capture: flags & 2 != 0,
+            bracketed_paste: flags & 4 != 0,
+            focus_reporting: flags & 8 != 0,
+            enhanced_keyboard: flags & 16 != 0,
         })
         .map_err(|e| Box::new(e.description()))?;
         unsafe {

@@ -46,7 +46,7 @@ run("deno", "test", "--allow-ffi", "--allow-read", "--allow-write", "tests/integ
 harness = root / "tests/integration" / ("windows_console.py" if windows else "terminal_pty.py")
 run(sys.executable, harness, client)
 for fixture in ["deno.ts", "application.ts"]:
-    run(sys.executable, harness, shutil.which("deno"), "run", "--allow-ffi", root / "tests/integration" / fixture, library)
+    run(sys.executable, harness, shutil.which("deno"), "run", "--allow-ffi", "--allow-read=tests/fixtures", root / "tests/integration" / fixture, library)
 if not windows:
     run("cargo", "test", "--manifest-path", "native/Cargo.toml", "--locked", "-p", "ratatui-js-crossterm",
         "--test", "terminal_pty", "real_terminal_lifecycle", "--", "--ignored", "--nocapture")
