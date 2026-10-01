@@ -1,8 +1,9 @@
 # Application API
 
 `createFrame(root)` validates existing protocol nodes. `row`, `column`, `block`,
-`paragraph`, and `list` build those nodes with typed options. Validation happens
-when constructing a frame; builders do not mutate inputs.
+`paragraph`, `list`, `table`, `tabs`, `gauge`, `chart`, and `scrollbar` build
+those nodes with typed options. Validation happens when constructing a frame;
+builders do not mutate inputs.
 
 `startApplication(driver, {initialModel, view, update, rendered?})` takes
 ownership of the driver and returns `{done, update, exit}`. `runApplication`
@@ -19,11 +20,13 @@ its redraw completes. Changes queued during rendering share the next redraw.
 Updates queued at exit reject. A view or update must finish its own async work;
 exit cannot cancel arbitrary application callbacks.
 
-The optional `rendered(model, result)` receives dimensions and native list
-state. Return a model with updated list offsets/selections. This callback does
-not itself invalidate the frame, avoiding an endless redraw cycle. New events
-and explicit updates redraw using the updated state. Do not invoke and await
-`app.update()` from within a runner callback: it would wait for itself.
+The optional `rendered(model, result)` receives dimensions and widget state.
+Return a model with updated list/table offsets and selections, tab selections,
+or scrollbar positions. See [the protocol](../../docs/protocol.md) for widget
+fields and state mappings. This callback does not itself invalidate the frame,
+avoiding an endless redraw cycle. New events and explicit updates redraw using
+the updated state. Do not invoke and await `app.update()` from within a runner
+callback: it would wait for itself.
 
 See [`examples/application.ts`](../../examples/application.ts) for list
 selection, resize redraw, keyboard exit, and Deno interrupt cleanup.

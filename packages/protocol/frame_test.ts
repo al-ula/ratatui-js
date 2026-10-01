@@ -133,3 +133,31 @@ Deno.test("unknown nested fields and malformed styles are rejected", () => {
     assertThrows(() => validateFrame({ protocolVersion: 1, root }), FrameError);
   }
 });
+
+Deno.test("new numeric widget inputs reject nonfinite values before encoding", () => {
+  for (const value of [NaN, Infinity, -Infinity]) {
+    for (
+      const root of [
+        { type: "gauge", ratio: value },
+        {
+          type: "chart",
+          datasets: [],
+          xAxis: { bounds: [0, value] },
+          yAxis: { bounds: [0, 1] },
+        },
+        {
+          type: "chart",
+          datasets: [{ data: [[value, 0]] }],
+          xAxis: { bounds: [0, 1] },
+          yAxis: { bounds: [0, 1] },
+        },
+        { type: "scrollbar", id: "scroll", contentLength: value },
+      ]
+    ) {
+      assertThrows(
+        () => validateFrame({ protocolVersion: 1, root }),
+        FrameError,
+      );
+    }
+  }
+});

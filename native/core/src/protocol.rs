@@ -120,6 +120,61 @@ pub enum Border {
     None,
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ChartAxis {
+    pub bounds: [f64; 2],
+    #[serde(
+        default,
+        deserialize_with = "supplied",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub title: Option<String>,
+    #[serde(default)]
+    pub labels: Vec<TextLine>,
+    #[serde(default)]
+    pub style: Style,
+}
+
+#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum GraphType {
+    #[default]
+    Line,
+    Scatter,
+    Bar,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ChartDataset {
+    #[serde(
+        default,
+        deserialize_with = "supplied",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub name: Option<String>,
+    pub data: Vec<[f64; 2]>,
+    #[serde(default)]
+    pub graph_type: GraphType,
+    #[serde(default)]
+    pub style: Style,
+}
+
+#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ScrollbarOrientation {
+    #[default]
+    VerticalRight,
+    VerticalLeft,
+    HorizontalBottom,
+    HorizontalTop,
+}
+
+fn default_column_spacing() -> u16 {
+    1
+}
+
 fn default_highlight_style() -> Style {
     Style {
         reversed: true,
@@ -182,6 +237,77 @@ pub enum Node {
         style: Style,
         #[serde(default = "default_highlight_style")]
         highlight_style: Style,
+    },
+    Table {
+        id: String,
+        rows: Vec<Vec<TextLine>>,
+        widths: Vec<Constraint>,
+        #[serde(
+            default,
+            deserialize_with = "supplied",
+            skip_serializing_if = "Option::is_none"
+        )]
+        header: Option<Vec<TextLine>>,
+        #[serde(
+            default,
+            deserialize_with = "supplied",
+            skip_serializing_if = "Option::is_none"
+        )]
+        selected: Option<u32>,
+        #[serde(default)]
+        offset: u32,
+        #[serde(default = "default_column_spacing")]
+        column_spacing: u16,
+        #[serde(default)]
+        style: Style,
+        #[serde(default = "default_highlight_style")]
+        highlight_style: Style,
+    },
+    Tabs {
+        id: String,
+        titles: Vec<TextLine>,
+        #[serde(
+            default,
+            deserialize_with = "supplied",
+            skip_serializing_if = "Option::is_none"
+        )]
+        selected: Option<u32>,
+        #[serde(default)]
+        style: Style,
+        #[serde(default = "default_highlight_style")]
+        highlight_style: Style,
+    },
+    Gauge {
+        ratio: f64,
+        #[serde(
+            default,
+            deserialize_with = "supplied",
+            skip_serializing_if = "Option::is_none"
+        )]
+        label: Option<TextSpan>,
+        #[serde(default)]
+        style: Style,
+        #[serde(default)]
+        gauge_style: Style,
+    },
+    Chart {
+        datasets: Vec<ChartDataset>,
+        x_axis: ChartAxis,
+        y_axis: ChartAxis,
+        #[serde(default)]
+        style: Style,
+    },
+    Scrollbar {
+        id: String,
+        content_length: u32,
+        #[serde(default)]
+        position: u32,
+        #[serde(default)]
+        viewport_content_length: u32,
+        #[serde(default)]
+        orientation: ScrollbarOrientation,
+        #[serde(default)]
+        style: Style,
     },
 }
 
@@ -273,7 +399,7 @@ impl ValidationState {
         Ok(())
     }
 
-    fn line(&mut self, spans: &TextLine, path: &str) -> Result<(), RenderError> {
+    fn line(&mut self, spans: &[TextSpan], path: &str) -> Result<(), RenderError> {
         self.collection(spans.len(), path)?;
         for (index, span) in spans.iter().enumerate() {
             self.spans += 1;
@@ -281,6 +407,80 @@ impl ValidationState {
                 return Err(RenderError::invalid(path, "too many spans"));
             }
             self.text(&span.text, &format!("{path}[{index}].text"))?;
+        }
+        Ok(())
+    }
+
+    fn widget_id(&mut self, id: &str, path: &str) -> Result<(), RenderError> {
+        self.text(id, path)?;
+        if id.is_empty() || !self.ids.insert(id.to_owned()) {
+            return Err(RenderError::invalid(
+                path,
+                "expected a nonempty, unique widget ID",
+            ));
+        }
+        Ok(())
+    }
+
+    fn selection(&self, selected: Option<u32>, len: usize, path: &str) -> Result<(), RenderError> {
+        if selected.is_some_and(|value| value as usize >= len) {
+            return Err(RenderError::invalid(
+                path,
+                "selection is outside the content",
+            ));
+        }
+        Ok(())
+    }
+
+    fn offset(&self, offset: u32, len: usize, path: &str) -> Result<(), RenderError> {
+        if offset as usize >= len.max(1) {
+            return Err(RenderError::invalid(path, "offset is outside the content"));
+        }
+        Ok(())
+    }
+
+    fn constraint(&self, constraint: &Constraint, path: &str) -> Result<(), RenderError> {
+        match constraint {
+            Constraint::Percentage { value } if *value > 100 => {
+                Err(RenderError::invalid(path, "percentage exceeds 100"))
+            }
+            Constraint::Fill { value: 0 } => {
+                Err(RenderError::invalid(path, "fill must be positive"))
+            }
+            _ => Ok(()),
+        }
+    }
+
+    fn table_row(
+        &mut self,
+        row: &[TextLine],
+        columns: usize,
+        path: &str,
+    ) -> Result<(), RenderError> {
+        self.collection(row.len(), path)?;
+        if row.len() != columns {
+            return Err(RenderError::invalid(path, "cell count must match widths"));
+        }
+        for (index, cell) in row.iter().enumerate() {
+            self.line(cell, &format!("{path}[{index}]"))?;
+        }
+        Ok(())
+    }
+
+    fn axis(&mut self, axis: &ChartAxis, path: &str) -> Result<(), RenderError> {
+        let [min, max] = axis.bounds;
+        if !min.is_finite() || !max.is_finite() || min >= max || !(max - min).is_finite() {
+            return Err(RenderError::invalid(
+                path,
+                "expected increasing bounds with a finite range",
+            ));
+        }
+        if let Some(title) = &axis.title {
+            self.text(title, &format!("{path}.title"))?;
+        }
+        self.collection(axis.labels.len(), &format!("{path}.labels"))?;
+        for (index, label) in axis.labels.iter().enumerate() {
+            self.line(label, &format!("{path}.labels[{index}]"))?;
         }
         Ok(())
     }
@@ -298,21 +498,7 @@ impl ValidationState {
                 self.collection(children.len(), &format!("{path}.children"))?;
                 for (index, child) in children.iter().enumerate() {
                     let child_path = format!("{path}.children[{index}]");
-                    match child.constraint {
-                        Constraint::Percentage { value } if value > 100 => {
-                            return Err(RenderError::invalid(
-                                &format!("{child_path}.constraint.value"),
-                                "percentage exceeds 100",
-                            ));
-                        }
-                        Constraint::Fill { value: 0 } => {
-                            return Err(RenderError::invalid(
-                                &format!("{child_path}.constraint.value"),
-                                "fill must be positive",
-                            ));
-                        }
-                        _ => {}
-                    }
+                    self.constraint(&child.constraint, &format!("{child_path}.constraint.value"))?;
                     self.node(&child.node, &format!("{child_path}.node"), depth + 1)?;
                 }
             }
@@ -328,6 +514,95 @@ impl ValidationState {
                     self.line(line, &format!("{path}.lines[{index}]"))?;
                 }
             }
+            Node::Table {
+                id,
+                rows,
+                widths,
+                header,
+                selected,
+                offset,
+                ..
+            } => {
+                self.widget_id(id, &format!("{path}.id"))?;
+                self.collection(widths.len(), &format!("{path}.widths"))?;
+                for (index, width) in widths.iter().enumerate() {
+                    self.constraint(width, &format!("{path}.widths[{index}]"))?;
+                }
+                self.collection(rows.len(), &format!("{path}.rows"))?;
+                for (index, row) in rows.iter().enumerate() {
+                    self.table_row(row, widths.len(), &format!("{path}.rows[{index}]"))?;
+                }
+                if let Some(header) = header {
+                    self.table_row(header, widths.len(), &format!("{path}.header"))?;
+                }
+                self.selection(*selected, rows.len(), &format!("{path}.selected"))?;
+                self.offset(*offset, rows.len(), &format!("{path}.offset"))?;
+            }
+            Node::Tabs {
+                id,
+                titles,
+                selected,
+                ..
+            } => {
+                self.widget_id(id, &format!("{path}.id"))?;
+                self.collection(titles.len(), &format!("{path}.titles"))?;
+                for (index, title) in titles.iter().enumerate() {
+                    self.line(title, &format!("{path}.titles[{index}]"))?;
+                }
+                self.selection(*selected, titles.len(), &format!("{path}.selected"))?;
+            }
+            Node::Gauge { ratio, label, .. } => {
+                if !ratio.is_finite() || !(0.0..=1.0).contains(ratio) {
+                    return Err(RenderError::invalid(
+                        &format!("{path}.ratio"),
+                        "ratio must be between 0 and 1",
+                    ));
+                }
+                if let Some(label) = label {
+                    self.line(std::slice::from_ref(label), &format!("{path}.label"))?;
+                }
+            }
+            Node::Chart {
+                datasets,
+                x_axis,
+                y_axis,
+                ..
+            } => {
+                self.axis(x_axis, &format!("{path}.xAxis"))?;
+                self.axis(y_axis, &format!("{path}.yAxis"))?;
+                self.collection(datasets.len(), &format!("{path}.datasets"))?;
+                for (index, dataset) in datasets.iter().enumerate() {
+                    let dataset_path = format!("{path}.datasets[{index}]");
+                    if let Some(name) = &dataset.name {
+                        self.text(name, &format!("{dataset_path}.name"))?;
+                    }
+                    self.collection(dataset.data.len(), &format!("{dataset_path}.data"))?;
+                    if dataset
+                        .data
+                        .iter()
+                        .flatten()
+                        .any(|value| !value.is_finite())
+                    {
+                        return Err(RenderError::invalid(
+                            &format!("{dataset_path}.data"),
+                            "expected finite coordinates",
+                        ));
+                    }
+                }
+            }
+            Node::Scrollbar {
+                id,
+                content_length,
+                position,
+                ..
+            } => {
+                self.widget_id(id, &format!("{path}.id"))?;
+                self.offset(
+                    *position,
+                    *content_length as usize,
+                    &format!("{path}.position"),
+                )?;
+            }
             Node::List {
                 id,
                 items,
@@ -335,13 +610,7 @@ impl ValidationState {
                 offset,
                 ..
             } => {
-                self.text(id, &format!("{path}.id"))?;
-                if id.is_empty() || !self.ids.insert(id.clone()) {
-                    return Err(RenderError::invalid(
-                        &format!("{path}.id"),
-                        "expected a nonempty, unique widget ID",
-                    ));
-                }
+                self.widget_id(id, &format!("{path}.id"))?;
                 self.collection(items.len(), &format!("{path}.items"))?;
                 if selected.is_some_and(|selected| selected as usize >= items.len()) {
                     return Err(RenderError::invalid(

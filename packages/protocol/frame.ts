@@ -129,6 +129,74 @@ function line(value: unknown, path: string, state: ValidationState): void {
   }
 }
 
+function constraint(value: unknown, path: string): void {
+  const item = object(value, path, ["kind", "value"]);
+  if (
+    !["length", "min", "max", "percentage", "fill"].includes(
+      item.kind as string,
+    )
+  ) invalid(`${path}.kind`, "unknown constraint");
+  const amount = integer(
+    item.value,
+    `${path}.value`,
+    item.kind === "percentage" ? 100 : 65535,
+  );
+  if (item.kind === "fill" && amount === 0) {
+    invalid(`${path}.value`, "fill must be positive");
+  }
+}
+
+function finite(value: unknown, path: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    invalid(path, "expected a finite number");
+  }
+  return value;
+}
+
+function pair(value: unknown, path: string): readonly [number, number] {
+  if (!Array.isArray(value) || value.length !== 2) {
+    invalid(path, "expected two coordinates");
+  }
+  return [finite(value[0], `${path}[0]`), finite(value[1], `${path}[1]`)];
+}
+
+function widgetId(value: unknown, path: string, state: ValidationState): void {
+  const id = text(value, path, state);
+  if (id.length === 0 || state.ids.has(id)) {
+    invalid(path, "expected a nonempty, unique widget ID");
+  }
+  state.ids.add(id);
+}
+
+function selection(value: unknown, path: string, length: number): void {
+  if (value !== undefined && integer(value, path, 0xffffffff) >= length) {
+    invalid(path, "selection is outside the content");
+  }
+}
+
+function offset(value: unknown, path: string, length: number): void {
+  if (
+    value !== undefined &&
+    integer(value, path, 0xffffffff) >= Math.max(1, length)
+  ) invalid(path, "offset is outside the content");
+}
+
+function axis(value: unknown, path: string, state: ValidationState): void {
+  const item = object(value, path, ["bounds", "title", "labels", "style"]);
+  const bounds = pair(item.bounds, `${path}.bounds`);
+  if (bounds[0] >= bounds[1] || !Number.isFinite(bounds[1] - bounds[0])) {
+    invalid(`${path}.bounds`, "expected increasing bounds with a finite range");
+  }
+  if (item.title !== undefined) text(item.title, `${path}.title`, state);
+  if (item.labels !== undefined) {
+    for (
+      const [index, label] of collection(item.labels, `${path}.labels`)
+        .entries()
+    ) line(label, `${path}.labels[${index}]`, state);
+  }
+  if (item.style !== undefined) style(item.style, `${path}.style`);
+}
+
 function node(
   value: unknown,
   path: string,
@@ -154,25 +222,7 @@ function node(
     for (const [index, value] of children.entries()) {
       const childPath = `${path}.children[${index}]`;
       const child = object(value, childPath, ["constraint", "node"]);
-      const constraint = object(child.constraint, `${childPath}.constraint`, [
-        "kind",
-        "value",
-      ]);
-      if (
-        !["length", "min", "max", "percentage", "fill"].includes(
-          constraint.kind as string,
-        )
-      ) {
-        invalid(`${childPath}.constraint.kind`, "unknown constraint");
-      }
-      const amount = integer(
-        constraint.value,
-        `${childPath}.constraint.value`,
-        constraint.kind === "percentage" ? 100 : 65_535,
-      );
-      if (constraint.kind === "fill" && amount === 0) {
-        invalid(`${childPath}.constraint.value`, "fill must be positive");
-      }
+      constraint(child.constraint, `${childPath}.constraint`);
       node(child.node, `${childPath}.node`, depth + 1, state);
     }
     return;
@@ -233,11 +283,7 @@ function node(
       "style",
       "highlightStyle",
     ]);
-    const id = text(list.id, `${path}.id`, state);
-    if (id.length === 0 || state.ids.has(id)) {
-      invalid(`${path}.id`, "expected a nonempty, unique widget ID");
-    }
-    state.ids.add(id);
+    widgetId(list.id, `${path}.id`, state);
     const items = collection(list.items, `${path}.items`);
     for (const [index, value] of items.entries()) {
       line(value, `${path}.items[${index}]`, state);
@@ -262,6 +308,161 @@ function node(
     if (list.highlightStyle !== undefined) {
       style(list.highlightStyle, `${path}.highlightStyle`);
     }
+    return;
+  }
+
+  if (type === "table") {
+    const item = object(value, path, [
+      "type",
+      "id",
+      "rows",
+      "widths",
+      "header",
+      "selected",
+      "offset",
+      "columnSpacing",
+      "style",
+      "highlightStyle",
+    ]);
+    widgetId(item.id, `${path}.id`, state);
+    const widths = collection(item.widths, `${path}.widths`);
+    for (const [index, width] of widths.entries()) {
+      constraint(width, `${path}.widths[${index}]`);
+    }
+    const row = (value: unknown, rowPath: string) => {
+      const cells = collection(value, rowPath);
+      if (cells.length !== widths.length) {
+        invalid(rowPath, "cell count must match widths");
+      }
+      for (const [index, cell] of cells.entries()) {
+        line(cell, `${rowPath}[${index}]`, state);
+      }
+    };
+    const rows = collection(item.rows, `${path}.rows`);
+    for (const [index, value] of rows.entries()) {
+      row(value, `${path}.rows[${index}]`);
+    }
+    if (item.header !== undefined) row(item.header, `${path}.header`);
+    selection(item.selected, `${path}.selected`, rows.length);
+    offset(item.offset, `${path}.offset`, rows.length);
+    if (item.columnSpacing !== undefined) {
+      integer(item.columnSpacing, `${path}.columnSpacing`);
+    }
+    if (item.style !== undefined) style(item.style, `${path}.style`);
+    if (item.highlightStyle !== undefined) {
+      style(item.highlightStyle, `${path}.highlightStyle`);
+    }
+    return;
+  }
+  if (type === "tabs") {
+    const item = object(value, path, [
+      "type",
+      "id",
+      "titles",
+      "selected",
+      "style",
+      "highlightStyle",
+    ]);
+    widgetId(item.id, `${path}.id`, state);
+    const titles = collection(item.titles, `${path}.titles`);
+    for (const [index, title] of titles.entries()) {
+      line(title, `${path}.titles[${index}]`, state);
+    }
+    selection(item.selected, `${path}.selected`, titles.length);
+    if (item.style !== undefined) style(item.style, `${path}.style`);
+    if (item.highlightStyle !== undefined) {
+      style(item.highlightStyle, `${path}.highlightStyle`);
+    }
+    return;
+  }
+  if (type === "gauge") {
+    const item = object(value, path, [
+      "type",
+      "ratio",
+      "label",
+      "style",
+      "gaugeStyle",
+    ]);
+    const ratio = finite(item.ratio, `${path}.ratio`);
+    if (ratio < 0 || ratio > 1) {
+      invalid(`${path}.ratio`, "ratio must be between 0 and 1");
+    }
+    if (item.label !== undefined) line([item.label], `${path}.label`, state);
+    if (item.style !== undefined) style(item.style, `${path}.style`);
+    if (item.gaugeStyle !== undefined) {
+      style(item.gaugeStyle, `${path}.gaugeStyle`);
+    }
+    return;
+  }
+  if (type === "chart") {
+    const item = object(value, path, [
+      "type",
+      "datasets",
+      "xAxis",
+      "yAxis",
+      "style",
+    ]);
+    axis(item.xAxis, `${path}.xAxis`, state);
+    axis(item.yAxis, `${path}.yAxis`, state);
+    for (
+      const [index, value] of collection(item.datasets, `${path}.datasets`)
+        .entries()
+    ) {
+      const datasetPath = `${path}.datasets[${index}]`;
+      const dataset = object(value, datasetPath, [
+        "name",
+        "data",
+        "graphType",
+        "style",
+      ]);
+      if (dataset.name !== undefined) {
+        text(dataset.name, `${datasetPath}.name`, state);
+      }
+      if (
+        dataset.graphType !== undefined &&
+        !["line", "scatter", "bar"].includes(dataset.graphType as string)
+      ) invalid(`${datasetPath}.graphType`, "unknown graph type");
+      for (
+        const [index, point] of collection(dataset.data, `${datasetPath}.data`)
+          .entries()
+      ) pair(point, `${datasetPath}.data[${index}]`);
+      if (dataset.style !== undefined) {
+        style(dataset.style, `${datasetPath}.style`);
+      }
+    }
+    if (item.style !== undefined) style(item.style, `${path}.style`);
+    return;
+  }
+  if (type === "scrollbar") {
+    const item = object(value, path, [
+      "type",
+      "id",
+      "contentLength",
+      "position",
+      "viewportContentLength",
+      "orientation",
+      "style",
+    ]);
+    widgetId(item.id, `${path}.id`, state);
+    const length = integer(
+      item.contentLength,
+      `${path}.contentLength`,
+      0xffffffff,
+    );
+    offset(item.position, `${path}.position`, length);
+    if (item.viewportContentLength !== undefined) {
+      integer(
+        item.viewportContentLength,
+        `${path}.viewportContentLength`,
+        0xffffffff,
+      );
+    }
+    if (
+      item.orientation !== undefined &&
+      !["verticalRight", "verticalLeft", "horizontalBottom", "horizontalTop"]
+        .includes(item.orientation as string)
+    ) invalid(`${path}.orientation`, "unknown orientation");
+    if (item.style !== undefined) style(item.style, `${path}.style`);
     return;
   }
 

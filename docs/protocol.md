@@ -47,7 +47,8 @@ validation provides earlier application errors.
 ## Lists
 
 - List `items` are single-line span arrays.
-- Each list requires a nonempty `id`, unique among lists in the frame.
+- Each list requires a nonempty `id`, unique among all stateful widgets in the
+  frame.
 - `selected` is an optional zero-based index; omit it for no selection.
 - `offset` defaults to zero and must be inside the list. Empty lists require
   offset zero and no selection.
@@ -66,6 +67,77 @@ validation provides earlier application errors.
 
 Rendering completion means the backend draw/output operation completed; it does
 not mean a queued render was merely accepted.
+
+## Tables, tabs, gauges, charts, and scrollbars
+
+- `table` requires `id`, `rows`, and `widths`. Each row is an array of cells;
+  each cell is a single-line span array. Optional `header` uses the same cell
+  format. Every row and header must have exactly as many cells as `widths`.
+  Widths use the layout constraints above. `columnSpacing` defaults to one cell.
+  `selected` selects a data row, excluding the header; omit it for no selection.
+  `offset` defaults to zero. Selection and offset must be inside the data rows;
+  empty tables require offset zero and no selection. Empty widths and rows are
+  allowed. Ratatui clips cells and adjusts offsets to keep selection visible.
+- `tabs` requires `id` and `titles`, an array of single-line span arrays.
+  `selected` is an optional zero-based title index; omission means no selection.
+  Empty tabs cannot have a selection. Titles use Ratatui's default spacing and
+  divider, and clip to the area. Table and tab `highlightStyle` defaults to
+  reversed text; an explicit style replaces that default.
+- `gauge` requires a finite `ratio` between zero and one inclusive. Optional
+  `label` is one `{text, style?}` span. Omission displays Ratatui's percentage
+  label; an empty span suppresses it. `style` styles the widget, while
+  `gaugeStyle` styles the filled region. Labels clip to the available width.
+- `chart` requires `datasets`, `xAxis`, and `yAxis`. Each axis has increasing
+  finite `bounds: [min, max]` with a finite difference, and optional `title`,
+  `labels` (single-line span arrays), and `style`. Each dataset has `data`, an
+  array of finite `[x, y]` coordinates, and optional `name`, `style`, and
+  `graphType` (`line`, the default, `scatter`, or `bar`). Charts use dot
+  markers, Ratatui's default legend behavior for named datasets, and clip points
+  outside the bounds. Empty datasets and empty point arrays are allowed.
+- `scrollbar` requires `id` and `contentLength`. `position` defaults to zero and
+  must be less than `contentLength`; empty content requires position zero. These
+  values and optional `viewportContentLength` are unsigned 32-bit integers.
+  Content length represents the number of scroll positions, rather than the
+  number of visible cells; viewport length is the visible content extent and
+  defaults to zero (Ratatui infers it from the area). `orientation` defaults to
+  `verticalRight`; alternatives are `verticalLeft`, `horizontalBottom`, and
+  `horizontalTop`. `style` applies to arrows, track, and thumb. Empty content or
+  an area too short for a track draws nothing. A scrollbar occupies an edge of
+  its own area; use a row or column to place it beside another widget.
+
+All widgets support optional `style`. IDs must be nonempty and unique across
+lists, tables, tabs, and scrollbars. Text and collection limits apply to new
+widgets, including table cells, axis labels, dataset names, and point arrays.
+
+## JavaScript-owned widget state
+
+Each frame supplies all state. The native renderer constructs temporary Ratatui
+state for that draw and retains no selections or scroll positions between
+frames. Input events do not change widget state automatically. Applications
+choose selections and positions in their model and submit them in the next
+frame.
+
+`widgetStates` returns one update for each list, table, tab set, and scrollbar,
+in tree traversal order, even when its area is empty. Gauge and chart nodes do
+not return state. The existing `{id, offset, selected?}` result format is
+shared:
+
+| Widget    | `offset`                      | `selected`                            |
+| --------- | ----------------------------- | ------------------------------------- |
+| List      | Actual first visible item     | Selected item, omitted if none        |
+| Table     | Actual first visible data row | Selected data row, omitted if none    |
+| Tabs      | Always zero                   | Supplied title index, omitted if none |
+| Scrollbar | Supplied `position`           | Always omitted                        |
+
+Apply results by ID to the JavaScript model before the next frame. For lists and
+tables, this preserves native scrolling adjustments when the terminal size
+changes. For scrollbars, assign the returned `offset` to `position`. The
+application runner's `rendered(model, result)` callback supports these updates
+without triggering a redraw loop.
+
+These additions retain protocol and ABI version 1 and the existing render-result
+shape. Native libraries built before these additions reject the new node types;
+use a matching native build when submitting them.
 
 ## Validation and failures
 

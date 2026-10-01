@@ -9,6 +9,8 @@ import {
 } from "@ratatui-js/protocol";
 
 export type {
+  ChartAxis,
+  ChartDataset,
   Color,
   Constraint,
   FrameDescription,
@@ -27,6 +29,7 @@ export type {
   TextLine,
   TextSpan,
   UiNode,
+  WidgetStateUpdate,
 } from "@ratatui-js/protocol";
 
 export interface TerminalOptions {
@@ -72,7 +75,18 @@ export function createFrame(root: UiNode): FrameDescription {
   validateFrame(frame);
   return frame;
 }
-export { block, column, list, paragraph, row } from "./builders.ts";
+export {
+  block,
+  chart,
+  column,
+  gauge,
+  list,
+  paragraph,
+  row,
+  scrollbar,
+  table,
+  tabs,
+} from "./builders.ts";
 export {
   type Application,
   type ApplicationDefinition,

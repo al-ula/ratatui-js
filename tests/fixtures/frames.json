@@ -8,10 +8,25 @@
         "protocolVersion": 1,
         "root": {
           "type": "paragraph",
-          "lines": [[{ "text": "hello" }], [{ "text": "world" }]]
+          "lines": [
+            [
+              {
+                "text": "hello"
+              }
+            ],
+            [
+              {
+                "text": "world"
+              }
+            ]
+          ]
         }
       },
-      "expectedLines": ["hello       ", "world       ", "            "],
+      "expectedLines": [
+        "hello       ",
+        "world       ",
+        "            "
+      ],
       "expectedStates": []
     },
     {
@@ -23,10 +38,24 @@
         "root": {
           "type": "block",
           "title": "demo",
-          "child": { "type": "paragraph", "lines": [[{ "text": "hello" }]] }
+          "child": {
+            "type": "paragraph",
+            "lines": [
+              [
+                {
+                  "text": "hello"
+                }
+              ]
+            ]
+          }
         }
       },
-      "expectedLines": ["┌demo────┐", "│hello   │", "│        │", "└────────┘"],
+      "expectedLines": [
+        "┌demo────┐",
+        "│hello   │",
+        "│        │",
+        "└────────┘"
+      ],
       "expectedStates": []
     },
     {
@@ -39,17 +68,44 @@
           "type": "row",
           "children": [
             {
-              "constraint": { "kind": "length", "value": 4 },
-              "node": { "type": "paragraph", "lines": [[{ "text": "L" }]] }
+              "constraint": {
+                "kind": "length",
+                "value": 4
+              },
+              "node": {
+                "type": "paragraph",
+                "lines": [
+                  [
+                    {
+                      "text": "L"
+                    }
+                  ]
+                ]
+              }
             },
             {
-              "constraint": { "kind": "fill", "value": 1 },
-              "node": { "type": "paragraph", "lines": [[{ "text": "R" }]] }
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "paragraph",
+                "lines": [
+                  [
+                    {
+                      "text": "R"
+                    }
+                  ]
+                ]
+              }
             }
           ]
         }
       },
-      "expectedLines": ["L   R     ", "          "],
+      "expectedLines": [
+        "L   R     ",
+        "          "
+      ],
       "expectedStates": []
     },
     {
@@ -62,27 +118,64 @@
           "type": "column",
           "children": [
             {
-              "constraint": { "kind": "length", "value": 1 },
-              "node": { "type": "paragraph", "lines": [[{ "text": "title" }]] }
+              "constraint": {
+                "kind": "length",
+                "value": 1
+              },
+              "node": {
+                "type": "paragraph",
+                "lines": [
+                  [
+                    {
+                      "text": "title"
+                    }
+                  ]
+                ]
+              }
             },
             {
-              "constraint": { "kind": "fill", "value": 1 },
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
               "node": {
                 "type": "list",
                 "id": "tasks",
                 "selected": 2,
                 "items": [
-                  [{ "text": "a" }],
-                  [{ "text": "b" }],
-                  [{ "text": "c" }]
+                  [
+                    {
+                      "text": "a"
+                    }
+                  ],
+                  [
+                    {
+                      "text": "b"
+                    }
+                  ],
+                  [
+                    {
+                      "text": "c"
+                    }
+                  ]
                 ]
               }
             }
           ]
         }
       },
-      "expectedLines": ["title   ", "b       ", "c       "],
-      "expectedStates": [{ "id": "tasks", "offset": 1, "selected": 2 }]
+      "expectedLines": [
+        "title   ",
+        "b       ",
+        "c       "
+      ],
+      "expectedStates": [
+        {
+          "id": "tasks",
+          "offset": 1,
+          "selected": 2
+        }
+      ]
     },
     {
       "name": "wide and combining Unicode",
@@ -90,9 +183,20 @@
       "height": 1,
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "paragraph", "lines": [[{ "text": "界é" }]] }
+        "root": {
+          "type": "paragraph",
+          "lines": [
+            [
+              {
+                "text": "界é"
+              }
+            ]
+          ]
+        }
       },
-      "expectedLines": ["界é   "],
+      "expectedLines": [
+        "界é   "
+      ],
       "expectedStates": []
     },
     {
@@ -104,10 +208,20 @@
         "root": {
           "type": "paragraph",
           "wrap": true,
-          "lines": [[{ "text": "abcdef" }]]
+          "lines": [
+            [
+              {
+                "text": "abcdef"
+              }
+            ]
+          ]
         }
       },
-      "expectedLines": ["abcd", "ef  ", "    "],
+      "expectedLines": [
+        "abcd",
+        "ef  ",
+        "    "
+      ],
       "expectedStates": []
     },
     {
@@ -116,9 +230,20 @@
       "height": 1,
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "paragraph", "lines": [[{ "text": "abcdef" }]] }
+        "root": {
+          "type": "paragraph",
+          "lines": [
+            [
+              {
+                "text": "abcdef"
+              }
+            ]
+          ]
+        }
       },
-      "expectedLines": ["abcd"],
+      "expectedLines": [
+        "abcd"
+      ],
       "expectedStates": []
     },
     {
@@ -132,17 +257,43 @@
           "spacing": 1,
           "children": [
             {
-              "constraint": { "kind": "length", "value": 4 },
-              "node": { "type": "paragraph", "lines": [[{ "text": "A" }]] }
+              "constraint": {
+                "kind": "length",
+                "value": 4
+              },
+              "node": {
+                "type": "paragraph",
+                "lines": [
+                  [
+                    {
+                      "text": "A"
+                    }
+                  ]
+                ]
+              }
             },
             {
-              "constraint": { "kind": "fill", "value": 1 },
-              "node": { "type": "paragraph", "lines": [[{ "text": "B" }]] }
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "paragraph",
+                "lines": [
+                  [
+                    {
+                      "text": "B"
+                    }
+                  ]
+                ]
+              }
             }
           ]
         }
       },
-      "expectedLines": ["A    B   "],
+      "expectedLines": [
+        "A    B   "
+      ],
       "expectedStates": []
     },
     {
@@ -151,9 +302,14 @@
       "height": 1,
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "row", "children": [] }
+        "root": {
+          "type": "row",
+          "children": []
+        }
       },
-      "expectedLines": ["    "],
+      "expectedLines": [
+        "    "
+      ],
       "expectedStates": []
     },
     {
@@ -162,10 +318,668 @@
       "height": 1,
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "list", "id": "empty", "items": [] }
+        "root": {
+          "type": "list",
+          "id": "empty",
+          "items": []
+        }
       },
-      "expectedLines": ["    "],
-      "expectedStates": [{ "id": "empty", "offset": 0 }]
+      "expectedLines": [
+        "    "
+      ],
+      "expectedStates": [
+        {
+          "id": "empty",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "name": "table header and selected row scroll",
+      "width": 8,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ],
+          "header": [
+            [
+              {
+                "text": "A"
+              }
+            ],
+            [
+              {
+                "text": "B"
+              }
+            ]
+          ],
+          "selected": 2
+        }
+      },
+      "expectedLines": [
+        "A   B   ",
+        "two row ",
+        "end last"
+      ],
+      "expectedStates": [
+        {
+          "id": "table",
+          "offset": 1,
+          "selected": 2
+        }
+      ]
+    },
+    {
+      "name": "table clips cells and rows",
+      "width": 5,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ]
+        }
+      },
+      "expectedLines": [
+        "abc X"
+      ],
+      "expectedStates": [
+        {
+          "id": "table",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "name": "empty table",
+      "width": 4,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [],
+          "rows": []
+        }
+      },
+      "expectedLines": [
+        "    "
+      ],
+      "expectedStates": [
+        {
+          "id": "table",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "name": "tabs selection",
+      "width": 12,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": 1
+        }
+      },
+      "expectedLines": [
+        " One │ Two  "
+      ],
+      "expectedStates": [
+        {
+          "id": "tabs",
+          "offset": 0,
+          "selected": 1
+        }
+      ]
+    },
+    {
+      "name": "tabs clipped",
+      "width": 4,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": 1
+        }
+      },
+      "expectedLines": [
+        " One"
+      ],
+      "expectedStates": [
+        {
+          "id": "tabs",
+          "offset": 0,
+          "selected": 1
+        }
+      ]
+    },
+    {
+      "name": "empty tabs",
+      "width": 4,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": []
+        }
+      },
+      "expectedLines": [
+        "    "
+      ],
+      "expectedStates": [
+        {
+          "id": "tabs",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "name": "gauge custom label",
+      "width": 8,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": 0.5,
+          "label": {
+            "text": "half"
+          }
+        }
+      },
+      "expectedLines": [
+        "██half  "
+      ],
+      "expectedStates": []
+    },
+    {
+      "name": "gauge clipped label",
+      "width": 3,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": 1,
+          "label": {
+            "text": "abcdef"
+          }
+        }
+      },
+      "expectedLines": [
+        "abc"
+      ],
+      "expectedStates": []
+    },
+    {
+      "name": "gauge empty label",
+      "width": 4,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": 0,
+          "label": {
+            "text": ""
+          }
+        }
+      },
+      "expectedLines": [
+        "    "
+      ],
+      "expectedStates": []
+    },
+    {
+      "name": "gauge default label",
+      "width": 5,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": 0.5
+        }
+      },
+      "expectedLines": [
+        "█50% "
+      ],
+      "expectedStates": []
+    },
+    {
+      "name": "chart scatter endpoints",
+      "width": 3,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ]
+        }
+      },
+      "expectedLines": [
+        "  •",
+        "   ",
+        "•  "
+      ],
+      "expectedStates": []
+    },
+    {
+      "name": "chart clips points outside axes",
+      "width": 3,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  -1,
+                  -1
+                ],
+                [
+                  3,
+                  3
+                ],
+                [
+                  1,
+                  1
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ]
+        }
+      },
+      "expectedLines": [
+        "   ",
+        " • ",
+        "   "
+      ],
+      "expectedStates": []
+    },
+    {
+      "name": "chart empty data",
+      "width": 3,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": []
+        }
+      },
+      "expectedLines": [
+        "   ",
+        "   ",
+        "   "
+      ],
+      "expectedStates": []
+    },
+    {
+      "name": "chart line",
+      "width": 3,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "expectedLines": [
+        "  •",
+        " • ",
+        "•  "
+      ],
+      "expectedStates": []
+    },
+    {
+      "name": "chart bar",
+      "width": 3,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  1,
+                  2
+                ]
+              ],
+              "graphType": "bar"
+            }
+          ]
+        }
+      },
+      "expectedLines": [
+        " • ",
+        " • ",
+        " • "
+      ],
+      "expectedStates": []
+    },
+    {
+      "name": "scrollbar vertical",
+      "width": 4,
+      "height": 4,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 1,
+          "viewportContentLength": 1
+        }
+      },
+      "expectedLines": [
+        "   ▲",
+        "   █",
+        "   █",
+        "   ▼"
+      ],
+      "expectedStates": [
+        {
+          "id": "scroll",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "name": "scrollbar horizontal",
+      "width": 4,
+      "height": 2,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 1,
+          "viewportContentLength": 1,
+          "orientation": "horizontalTop"
+        }
+      },
+      "expectedLines": [
+        "◄██►",
+        "    "
+      ],
+      "expectedStates": [
+        {
+          "id": "scroll",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "name": "scrollbar empty content",
+      "width": 4,
+      "height": 3,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 0,
+          "viewportContentLength": 1
+        }
+      },
+      "expectedLines": [
+        "    ",
+        "    ",
+        "    "
+      ],
+      "expectedStates": [
+        {
+          "id": "scroll",
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "name": "scrollbar clipped track",
+      "width": 2,
+      "height": 1,
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 5,
+          "viewportContentLength": 1,
+          "position": 4
+        }
+      },
+      "expectedLines": [
+        "  "
+      ],
+      "expectedStates": [
+        {
+          "id": "scroll",
+          "offset": 4
+        }
+      ]
     }
   ],
   "invalid": [
@@ -174,7 +988,10 @@
       "code": "unsupportedProtocol",
       "frame": {
         "protocolVersion": 2,
-        "root": { "type": "paragraph", "lines": [] }
+        "root": {
+          "type": "paragraph",
+          "lines": []
+        }
       }
     },
     {
@@ -182,7 +999,11 @@
       "code": "invalidFrame",
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "paragraph", "lines": [], "unknown": true }
+        "root": {
+          "type": "paragraph",
+          "lines": [],
+          "unknown": true
+        }
       }
     },
     {
@@ -190,7 +1011,16 @@
       "code": "invalidFrame",
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "paragraph", "lines": [[{ "text": "\u001b[31m" }]] }
+        "root": {
+          "type": "paragraph",
+          "lines": [
+            [
+              {
+                "text": "\u001b[31m"
+              }
+            ]
+          ]
+        }
       }
     },
     {
@@ -198,7 +1028,16 @@
       "code": "invalidFrame",
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "paragraph", "lines": [[{ "text": "a\nb" }]] }
+        "root": {
+          "type": "paragraph",
+          "lines": [
+            [
+              {
+                "text": "a\nb"
+              }
+            ]
+          ]
+        }
       }
     },
     {
@@ -210,8 +1049,14 @@
           "type": "column",
           "children": [
             {
-              "constraint": { "kind": "percentage", "value": 101 },
-              "node": { "type": "paragraph", "lines": [] }
+              "constraint": {
+                "kind": "percentage",
+                "value": 101
+              },
+              "node": {
+                "type": "paragraph",
+                "lines": []
+              }
             }
           ]
         }
@@ -226,8 +1071,14 @@
           "type": "column",
           "children": [
             {
-              "constraint": { "kind": "fill", "value": 0 },
-              "node": { "type": "paragraph", "lines": [] }
+              "constraint": {
+                "kind": "fill",
+                "value": 0
+              },
+              "node": {
+                "type": "paragraph",
+                "lines": []
+              }
             }
           ]
         }
@@ -242,7 +1093,13 @@
           "type": "list",
           "id": "list",
           "selected": 1,
-          "items": [[{ "text": "one" }]]
+          "items": [
+            [
+              {
+                "text": "one"
+              }
+            ]
+          ]
         }
       }
     },
@@ -251,7 +1108,12 @@
       "code": "invalidFrame",
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "list", "id": "list", "offset": 1, "items": [] }
+        "root": {
+          "type": "list",
+          "id": "list",
+          "offset": 1,
+          "items": []
+        }
       }
     },
     {
@@ -259,7 +1121,12 @@
       "code": "invalidFrame",
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "list", "id": "list", "selected": null, "items": [] }
+        "root": {
+          "type": "list",
+          "id": "list",
+          "selected": null,
+          "items": []
+        }
       }
     },
     {
@@ -271,12 +1138,26 @@
           "type": "row",
           "children": [
             {
-              "constraint": { "kind": "fill", "value": 1 },
-              "node": { "type": "list", "id": "same", "items": [] }
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "list",
+                "id": "same",
+                "items": []
+              }
             },
             {
-              "constraint": { "kind": "fill", "value": 1 },
-              "node": { "type": "list", "id": "same", "items": [] }
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "list",
+                "id": "same",
+                "items": []
+              }
             }
           ]
         }
@@ -287,7 +1168,11 @@
       "code": "invalidFrame",
       "frame": {
         "protocolVersion": 1,
-        "root": { "type": "row", "children": [], "spacing": -1 }
+        "root": {
+          "type": "row",
+          "children": [],
+          "spacing": -1
+        }
       }
     },
     {
@@ -298,7 +1183,1857 @@
         "root": {
           "type": "paragraph",
           "lines": [],
-          "style": { "fg": "orange" }
+          "style": {
+            "fg": "orange"
+          }
+        }
+      }
+    },
+    {
+      "name": "table unknown field",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ],
+          "unknown": true
+        }
+      }
+    },
+    {
+      "name": "table null style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ],
+          "style": null
+        }
+      }
+    },
+    {
+      "name": "table invalid style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ],
+          "style": {
+            "bold": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "table empty id",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "table duplicate cross-widget id",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "row",
+          "children": [
+            {
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "table",
+                "id": "table",
+                "widths": [
+                  {
+                    "kind": "length",
+                    "value": 3
+                  },
+                  {
+                    "kind": "fill",
+                    "value": 1
+                  }
+                ],
+                "rows": [
+                  [
+                    [
+                      {
+                        "text": "abcde"
+                      }
+                    ],
+                    [
+                      {
+                        "text": "XYZ"
+                      }
+                    ]
+                  ],
+                  [
+                    [
+                      {
+                        "text": "two"
+                      }
+                    ],
+                    [
+                      {
+                        "text": "row"
+                      }
+                    ]
+                  ],
+                  [
+                    [
+                      {
+                        "text": "end"
+                      }
+                    ],
+                    [
+                      {
+                        "text": "last"
+                      }
+                    ]
+                  ]
+                ]
+              }
+            },
+            {
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "list",
+                "id": "table",
+                "items": []
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "tabs unknown field",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": 1,
+          "unknown": true
+        }
+      }
+    },
+    {
+      "name": "tabs null style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": 1,
+          "style": null
+        }
+      }
+    },
+    {
+      "name": "tabs invalid style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": 1,
+          "style": {
+            "bold": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "tabs empty id",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": 1
+        }
+      }
+    },
+    {
+      "name": "tabs duplicate cross-widget id",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "row",
+          "children": [
+            {
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "tabs",
+                "id": "tabs",
+                "titles": [
+                  [
+                    {
+                      "text": "One"
+                    }
+                  ],
+                  [
+                    {
+                      "text": "Two"
+                    }
+                  ]
+                ],
+                "selected": 1
+              }
+            },
+            {
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "list",
+                "id": "tabs",
+                "items": []
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "gauge unknown field",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": 0,
+          "unknown": true
+        }
+      }
+    },
+    {
+      "name": "gauge null style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": 0,
+          "style": null
+        }
+      }
+    },
+    {
+      "name": "gauge invalid style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": 0,
+          "style": {
+            "bold": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "chart unknown field",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ],
+          "unknown": true
+        }
+      }
+    },
+    {
+      "name": "chart null style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ],
+          "style": null
+        }
+      }
+    },
+    {
+      "name": "chart invalid style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ],
+          "style": {
+            "bold": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "scrollbar unknown field",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 1,
+          "viewportContentLength": 1,
+          "unknown": true
+        }
+      }
+    },
+    {
+      "name": "scrollbar null style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 1,
+          "viewportContentLength": 1,
+          "style": null
+        }
+      }
+    },
+    {
+      "name": "scrollbar invalid style",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 1,
+          "viewportContentLength": 1,
+          "style": {
+            "bold": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "scrollbar empty id",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "",
+          "contentLength": 1,
+          "viewportContentLength": 1
+        }
+      }
+    },
+    {
+      "name": "scrollbar duplicate cross-widget id",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "row",
+          "children": [
+            {
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "scrollbar",
+                "id": "scroll",
+                "contentLength": 1,
+                "viewportContentLength": 1
+              }
+            },
+            {
+              "constraint": {
+                "kind": "fill",
+                "value": 1
+              },
+              "node": {
+                "type": "list",
+                "id": "scroll",
+                "items": []
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "table invalid selection",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ],
+          "selected": 3
+        }
+      }
+    },
+    {
+      "name": "table invalid offset",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ],
+          "offset": 3
+        }
+      }
+    },
+    {
+      "name": "table null selection",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ],
+          "selected": null
+        }
+      }
+    },
+    {
+      "name": "table mismatched row",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "a"
+                }
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "table mismatched header",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ],
+          "header": []
+        }
+      }
+    },
+    {
+      "name": "table invalid width",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "percentage",
+              "value": 101
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "table zero fill",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "fill",
+              "value": 0
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "table invalid spacing",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "table",
+          "id": "table",
+          "widths": [
+            {
+              "kind": "length",
+              "value": 3
+            },
+            {
+              "kind": "fill",
+              "value": 1
+            }
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "abcde"
+                }
+              ],
+              [
+                {
+                  "text": "XYZ"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "two"
+                }
+              ],
+              [
+                {
+                  "text": "row"
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "end"
+                }
+              ],
+              [
+                {
+                  "text": "last"
+                }
+              ]
+            ]
+          ],
+          "columnSpacing": 65536
+        }
+      }
+    },
+    {
+      "name": "tabs invalid selection 2",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": 2
+        }
+      }
+    },
+    {
+      "name": "tabs invalid selection -1",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": -1
+        }
+      }
+    },
+    {
+      "name": "tabs invalid selection 0.5",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": 0.5
+        }
+      }
+    },
+    {
+      "name": "tabs invalid selection None",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [
+            [
+              {
+                "text": "One"
+              }
+            ],
+            [
+              {
+                "text": "Two"
+              }
+            ]
+          ],
+          "selected": null
+        }
+      }
+    },
+    {
+      "name": "tabs empty selection",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "tabs",
+          "id": "tabs",
+          "titles": [],
+          "selected": 0
+        }
+      }
+    },
+    {
+      "name": "gauge invalid ratio -0.1",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": -0.1
+        }
+      }
+    },
+    {
+      "name": "gauge invalid ratio 1.1",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": 1.1
+        }
+      }
+    },
+    {
+      "name": "gauge invalid ratio None",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": null
+        }
+      }
+    },
+    {
+      "name": "gauge invalid ratio 1",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": "1"
+        }
+      }
+    },
+    {
+      "name": "gauge control label",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "gauge",
+          "ratio": 0,
+          "label": {
+            "text": "\u001b"
+          }
+        }
+      }
+    },
+    {
+      "name": "chart invalid bounds [1, 1]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              1,
+              1
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid bounds [2, 0]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              2,
+              0
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid bounds [0]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid bounds [0, 1, 2]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              1,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid bounds [None, 1]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              null,
+              1
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid bounds [-1e+308, 1e+308]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              -1e+308,
+              1e+308
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid coordinates [[0]]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid coordinates [[0, 1, 2]]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  1,
+                  2
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid coordinates [[None, 0]]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  null,
+                  0
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid coordinates [[0, '1']]",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  "1"
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart invalid graph type",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [],
+              "graphType": "pie"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart control axis title",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ],
+            "title": "\n"
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2
+                ]
+              ],
+              "graphType": "scatter"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "chart control dataset name",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "chart",
+          "xAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "yAxis": {
+            "bounds": [
+              0,
+              2
+            ]
+          },
+          "datasets": [
+            {
+              "data": [],
+              "name": "\u001b"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "scrollbar invalid {'position': 1}",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 1,
+          "viewportContentLength": 1,
+          "position": 1
+        }
+      }
+    },
+    {
+      "name": "scrollbar invalid {'contentLength': 0, 'position': 1}",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 0,
+          "viewportContentLength": 1,
+          "position": 1
+        }
+      }
+    },
+    {
+      "name": "scrollbar invalid {'contentLength': -1}",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": -1,
+          "viewportContentLength": 1
+        }
+      }
+    },
+    {
+      "name": "scrollbar invalid {'position': None}",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 1,
+          "viewportContentLength": 1,
+          "position": null
+        }
+      }
+    },
+    {
+      "name": "scrollbar invalid {'viewportContentLength': 0.5}",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 1,
+          "viewportContentLength": 0.5
+        }
+      }
+    },
+    {
+      "name": "scrollbar invalid {'orientation': 'diagonal'}",
+      "code": "invalidFrame",
+      "frame": {
+        "protocolVersion": 1,
+        "root": {
+          "type": "scrollbar",
+          "id": "scroll",
+          "contentLength": 1,
+          "viewportContentLength": 1,
+          "orientation": "diagonal"
         }
       }
     }

@@ -1,6 +1,14 @@
 import { consoleModes } from "./console_modes.ts";
 import { assertEquals, assertRejects } from "@std/assert";
-import { createFrame } from "@ratatui-js/core";
+import {
+  chart,
+  column,
+  createFrame,
+  gauge,
+  scrollbar,
+  table,
+  tabs,
+} from "@ratatui-js/core";
 import {
   DenoAdapter,
   NativeError,
@@ -54,6 +62,39 @@ async function nextInputEvent() {
 }
 try {
   assertEquals((await driver.render(frame)).width, 80);
+  const text = (value: string) => [{ text: value }];
+  const widgets = createFrame(column([
+    {
+      constraint: { kind: "length", value: 2 },
+      node: table("table", [[text("one")], [text("two")], [text("three")]], [{
+        kind: "fill",
+        value: 1,
+      }], { selected: 2 }),
+    },
+    {
+      constraint: { kind: "length", value: 1 },
+      node: tabs("tabs", [text("first"), text("second")], { selected: 1 }),
+    },
+    {
+      constraint: { kind: "length", value: 1 },
+      node: gauge(0.5, { label: { text: "half" } }),
+    },
+    {
+      constraint: { kind: "length", value: 3 },
+      node: chart([{ data: [[0, 0], [1, 1]] }], { bounds: [0, 1] }, {
+        bounds: [0, 1],
+      }),
+    },
+    {
+      constraint: { kind: "length", value: 4 },
+      node: scrollbar("scroll", 10, { position: 3, viewportContentLength: 4 }),
+    },
+  ]));
+  assertEquals((await driver.render(widgets)).widgetStates, [
+    { id: "table", offset: 1, selected: 2 },
+    { id: "tabs", offset: 0, selected: 1 },
+    { id: "scroll", offset: 3 },
+  ]);
   const pending = nextInputEvent();
   await assertRejects(() => driver.nextEvent());
   // Waiting for native input must allow timers and native rendering to progress.

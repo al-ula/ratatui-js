@@ -34,9 +34,10 @@ cell-buffer tests use the real Rust renderer and Ratatui's `TestBackend`.
 
 ## State and scheduling
 
-JS owns selection and requested scroll offsets. Rust returns actual list state
-after rendering, keyed by unique widget IDs. Applications can use that result in
-the next frame; hidden native application state must not compete with JS state.
+JS owns selection and requested scroll offsets. Rust returns list/table offsets
+and selections, tab selections, and scrollbar positions after rendering, keyed
+by unique widget IDs. Applications can use that result in the next frame; hidden
+native application state must not compete with JS state.
 
 Platform drivers must serialize renders, allow one outstanding input wait, and
 wake that wait when closed. An event wait must not hold the render lock. Closing

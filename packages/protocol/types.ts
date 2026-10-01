@@ -64,6 +64,20 @@ export interface Padding {
   readonly bottom?: number;
 }
 
+export interface ChartAxis {
+  readonly bounds: readonly [number, number];
+  readonly title?: string;
+  readonly labels?: readonly TextLine[];
+  readonly style?: Style;
+}
+
+export interface ChartDataset {
+  readonly name?: string;
+  readonly data: readonly (readonly [number, number])[];
+  readonly graphType?: "line" | "scatter" | "bar";
+  readonly style?: Style;
+}
+
 export type UiNode =
   | {
     readonly type: "row" | "column";
@@ -92,6 +106,53 @@ export type UiNode =
     readonly offset?: number;
     readonly style?: Style;
     readonly highlightStyle?: Style;
+  }
+  | {
+    readonly type: "table";
+    readonly id: string;
+    readonly rows: readonly (readonly TextLine[])[];
+    readonly widths: readonly Constraint[];
+    readonly header?: readonly TextLine[];
+    readonly selected?: number;
+    readonly offset?: number;
+    readonly columnSpacing?: number;
+    readonly style?: Style;
+    readonly highlightStyle?: Style;
+  }
+  | {
+    readonly type: "tabs";
+    readonly id: string;
+    readonly titles: readonly TextLine[];
+    readonly selected?: number;
+    readonly style?: Style;
+    readonly highlightStyle?: Style;
+  }
+  | {
+    readonly type: "gauge";
+    readonly ratio: number;
+    readonly label?: TextSpan;
+    readonly style?: Style;
+    readonly gaugeStyle?: Style;
+  }
+  | {
+    readonly type: "chart";
+    readonly datasets: readonly ChartDataset[];
+    readonly xAxis: ChartAxis;
+    readonly yAxis: ChartAxis;
+    readonly style?: Style;
+  }
+  | {
+    readonly type: "scrollbar";
+    readonly id: string;
+    readonly contentLength: number;
+    readonly position?: number;
+    readonly viewportContentLength?: number;
+    readonly orientation?:
+      | "verticalRight"
+      | "verticalLeft"
+      | "horizontalBottom"
+      | "horizontalTop";
+    readonly style?: Style;
   };
 
 export interface FrameDescription {
@@ -101,7 +162,9 @@ export interface FrameDescription {
 
 export interface WidgetStateUpdate {
   readonly id: string;
+  /** List/table scroll offset, scrollbar position, or zero for tabs. */
   readonly offset: number;
+  /** List item, table data row, or tab index; omitted when unselected. */
   readonly selected?: number;
 }
 

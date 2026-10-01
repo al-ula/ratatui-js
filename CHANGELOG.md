@@ -7,6 +7,11 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 
 ### Added
 
+- Table, tabs, gauge, chart, and scrollbar nodes with typed builders, shared
+  validation, native rendering, and headless fixtures.
+- Explicit JavaScript-owned widget state and render-result updates for tables,
+  tabs, and scrollbars.
+
 - Mouse, paste, and focus input events; complete Crossterm key codes, modifiers,
   event kinds, and keypad/lock state in the shared protocol and validation.
 - Opt-in mouse capture, bracketed paste, focus reporting, and enhanced keyboard

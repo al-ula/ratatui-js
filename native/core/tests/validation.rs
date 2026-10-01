@@ -128,3 +128,38 @@ fn direct_rust_frames_are_validated_before_drawing() {
         .backend()
         .assert_buffer(&Buffer::with_lines(["good"]));
 }
+
+#[test]
+fn direct_rust_numeric_widget_inputs_are_validated_before_drawing() {
+    use ratatui_js_core::Node;
+    let mut renderer = Renderer::new(TestBackend::new(4, 1)).unwrap();
+    let mut gauge = decode(json!({"type": "gauge", "ratio": 0.5})).unwrap();
+    for value in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY, -0.1, 1.1] {
+        if let Node::Gauge { ratio, .. } = &mut gauge.root {
+            *ratio = value;
+        }
+        assert_eq!(
+            renderer.render(&gauge).unwrap_err().code(),
+            ErrorCode::InvalidFrame
+        );
+    }
+    let mut chart = decode(json!({"type": "chart", "xAxis": {"bounds": [0, 1]}, "yAxis": {"bounds": [0, 1]}, "datasets": [{"data": [[0, 0]]}]})).unwrap();
+    if let Node::Chart { datasets, .. } = &mut chart.root {
+        datasets[0].data[0][0] = f64::NAN;
+    }
+    assert_eq!(
+        renderer.render(&chart).unwrap_err().code(),
+        ErrorCode::InvalidFrame
+    );
+    if let Node::Chart {
+        datasets, x_axis, ..
+    } = &mut chart.root
+    {
+        datasets[0].data[0][0] = 0.0;
+        x_axis.bounds = [0.0, f64::INFINITY];
+    }
+    assert_eq!(
+        renderer.render(&chart).unwrap_err().code(),
+        ErrorCode::InvalidFrame
+    );
+}

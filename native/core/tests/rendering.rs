@@ -167,3 +167,113 @@ fn a_new_frame_clears_previous_content() {
         .backend()
         .assert_buffer(&Buffer::with_lines(["x   "]));
 }
+
+#[test]
+fn additional_widgets_handle_zero_sized_and_overpadded_areas() {
+    let fixtures: Value = serde_json::from_str(FIXTURES).unwrap();
+    for case in fixtures["valid"].as_array().unwrap() {
+        if !["table", "tabs", "gauge", "chart", "scrollbar"]
+            .contains(&case["frame"]["root"]["type"].as_str().unwrap())
+        {
+            continue;
+        }
+        for (width, height) in [(0, 0), (0, 1), (1, 0), (1, 1), (2, 2)] {
+            let mut renderer = renderer(width, height);
+            renderer
+                .render_json(&serde_json::to_vec(&case["frame"]).unwrap())
+                .unwrap();
+            let frame = json!({"protocolVersion": 1, "root": {
+                "type": "block", "padding": {"left": 65535, "top": 65535},
+                "child": case["frame"]["root"]
+            }});
+            renderer
+                .render_json(&serde_json::to_vec(&frame).unwrap())
+                .unwrap();
+        }
+    }
+}
+
+#[test]
+fn state_is_supplied_by_each_frame_and_never_retained_by_the_renderer() {
+    let mut renderer = renderer(4, 1);
+    let root = json!({"type": "table", "id": "table", "widths": [{"kind": "fill", "value": 1}],
+        "rows": [[[ {"text": "one"} ]], [[ {"text": "two"} ]]], "selected": 1});
+    let mut frame = json!({"protocolVersion": 1, "root": root});
+    let result = renderer
+        .render_json(&serde_json::to_vec(&frame).unwrap())
+        .unwrap();
+    assert_eq!(result.widget_states[0].offset, 1);
+    frame["root"].as_object_mut().unwrap().remove("selected");
+    let result = renderer
+        .render_json(&serde_json::to_vec(&frame).unwrap())
+        .unwrap();
+    assert_eq!(result.widget_states[0].offset, 0);
+    assert_eq!(result.widget_states[0].selected, None);
+    renderer
+        .terminal()
+        .backend()
+        .assert_buffer(&Buffer::with_lines(["one "]));
+}
+
+#[test]
+fn additional_widget_styles_reach_the_cell_buffer() {
+    for (root, width, height, x, y, color, reversed) in [
+        (
+            json!({"type": "table", "id": "table", "rows": [[[ {"text": "a"} ]]], "widths": [{"kind": "fill", "value": 1}], "selected": 0, "style": {"fg": "red"}, "highlightStyle": {"fg": "green"}}),
+            4,
+            1,
+            0,
+            0,
+            Color::Green,
+            false,
+        ),
+        (
+            json!({"type": "tabs", "id": "tabs", "titles": [[{"text": "a"}]], "selected": 0, "style": {"fg": "blue"}}),
+            4,
+            1,
+            1,
+            0,
+            Color::Blue,
+            true,
+        ),
+        (
+            json!({"type": "gauge", "ratio": 1, "label": {"text": "a", "style": {"fg": "yellow"}}, "gaugeStyle": {"fg": "green"}}),
+            3,
+            1,
+            1,
+            0,
+            Color::Yellow,
+            false,
+        ),
+        (
+            json!({"type": "chart", "xAxis": {"bounds": [0, 1]}, "yAxis": {"bounds": [0, 1]}, "datasets": [{"data": [[0, 0]], "style": {"fg": "cyan"}}]}),
+            3,
+            3,
+            0,
+            2,
+            Color::Cyan,
+            false,
+        ),
+        (
+            json!({"type": "scrollbar", "id": "scroll", "contentLength": 10, "style": {"fg": "magenta"}}),
+            4,
+            4,
+            3,
+            0,
+            Color::Magenta,
+            false,
+        ),
+    ] {
+        let mut renderer = renderer(width, height);
+        renderer
+            .render_json(&serde_json::to_vec(&json!({"protocolVersion": 1, "root": root})).unwrap())
+            .unwrap();
+        let cell = &renderer.terminal().backend().buffer()[(x, y)];
+        assert_eq!(cell.fg, color, "{root}");
+        assert_eq!(
+            cell.modifier.contains(Modifier::REVERSED),
+            reversed,
+            "{root}"
+        );
+    }
+}

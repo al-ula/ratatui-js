@@ -13,11 +13,11 @@
 
 ## Additional widgets
 
-- [ ] Add table, tabs, gauge, chart, and scrollbar nodes to the shared protocol,
+- [x] Add table, tabs, gauge, chart, and scrollbar nodes to the shared protocol,
       validation, TypeScript builders, and native renderer.
-- [ ] Define explicit JS-owned state and render-result updates for new stateful
+- [x] Define explicit JS-owned state and render-result updates for new stateful
       widgets.
-- [ ] Add headless rendering fixtures and validation tests for each widget,
+- [x] Add headless rendering fixtures and validation tests for each widget,
       including empty content, clipping, and invalid state.
 
 ## Richer styling

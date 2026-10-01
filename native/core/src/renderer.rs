@@ -4,12 +4,17 @@ use ratatui::{
     layout::{Constraint as NativeConstraint, Direction, Layout, Rect},
     style::{Color as NativeColor, Modifier, Style as NativeStyle},
     text::{Line, Span, Text},
-    widgets::{Block, BorderType, Borders, List, ListItem, ListState, Padding, Paragraph, Wrap},
+    widgets::{
+        Axis, Block, BorderType, Borders, Cell, Chart, Dataset, Gauge,
+        GraphType as NativeGraphType, List, ListItem, ListState, Padding, Paragraph,
+        Row as TableRow, Scrollbar, ScrollbarOrientation as NativeScrollbarOrientation,
+        ScrollbarState, Table, TableState, Tabs, Wrap,
+    },
 };
 
 use crate::{
-    Border, Color, Constraint, FrameDescription, LayoutChild, Node, RenderError, RenderResult,
-    Style, TextLine, WidgetStateUpdate,
+    Border, ChartAxis, Color, Constraint, FrameDescription, GraphType, LayoutChild, Node,
+    RenderError, RenderResult, ScrollbarOrientation, Style, TextLine, WidgetStateUpdate,
 };
 
 /// A renderer can target TestBackend now and a platform terminal backend later.
@@ -64,13 +69,9 @@ fn render_layout(
     spacing: u16,
     updates: &mut Vec<WidgetStateUpdate>,
 ) {
-    let constraints = children.iter().map(|child| match child.constraint {
-        Constraint::Length { value } => NativeConstraint::Length(value),
-        Constraint::Min { value } => NativeConstraint::Min(value),
-        Constraint::Max { value } => NativeConstraint::Max(value),
-        Constraint::Percentage { value } => NativeConstraint::Percentage(value),
-        Constraint::Fill { value } => NativeConstraint::Fill(value),
-    });
+    let constraints = children
+        .iter()
+        .map(|child| native_constraint(&child.constraint));
     let areas = Layout::new(direction, constraints)
         .spacing(spacing)
         .split(area);
@@ -144,6 +145,149 @@ fn render_node(
             }
             frame.render_widget(paragraph, area);
         }
+        Node::Table {
+            id,
+            rows,
+            widths,
+            header,
+            selected,
+            offset,
+            column_spacing,
+            style,
+            highlight_style,
+        } => {
+            let mut table = Table::new(
+                rows.iter().map(|row| native_row(row)),
+                widths.iter().map(native_constraint),
+            )
+            .column_spacing(*column_spacing)
+            .style(native_style(style))
+            .row_highlight_style(native_style(highlight_style));
+            if let Some(header) = header {
+                table = table.header(native_row(header));
+            }
+            let mut state = TableState::default()
+                .with_selected(selected.map(|value| value as usize))
+                .with_offset(*offset as usize);
+            frame.render_stateful_widget(table, area, &mut state);
+            updates.push(WidgetStateUpdate {
+                id: id.clone(),
+                offset: state.offset() as u32,
+                selected: state.selected().map(|value| value as u32),
+            });
+        }
+        Node::Tabs {
+            id,
+            titles,
+            selected,
+            style,
+            highlight_style,
+        } => {
+            let tabs = Tabs::new(titles.iter().map(native_line))
+                .select(selected.map(|value| value as usize))
+                .style(native_style(style))
+                .highlight_style(native_style(highlight_style));
+            frame.render_widget(tabs, area);
+            updates.push(WidgetStateUpdate {
+                id: id.clone(),
+                offset: 0,
+                selected: *selected,
+            });
+        }
+        Node::Gauge {
+            ratio,
+            label,
+            style,
+            gauge_style,
+        } => {
+            let mut gauge = Gauge::default()
+                .ratio(*ratio)
+                .style(native_style(style))
+                .gauge_style(native_style(gauge_style));
+            if let Some(label) = label {
+                gauge = gauge.label(Span::styled(
+                    label.text.as_str(),
+                    native_style(&label.style),
+                ));
+            }
+            frame.render_widget(gauge, area);
+        }
+        Node::Chart {
+            datasets,
+            x_axis,
+            y_axis,
+            style,
+        } => {
+            // Dataset borrows tuple slices for the duration of this draw only.
+            let points = datasets
+                .iter()
+                .map(|dataset| {
+                    dataset
+                        .data
+                        .iter()
+                        .map(|point| (point[0], point[1]))
+                        .collect::<Vec<_>>()
+                })
+                .collect::<Vec<_>>();
+            let datasets = datasets
+                .iter()
+                .zip(&points)
+                .map(|(dataset, data)| {
+                    let graph_type = match dataset.graph_type {
+                        GraphType::Line => NativeGraphType::Line,
+                        GraphType::Scatter => NativeGraphType::Scatter,
+                        GraphType::Bar => NativeGraphType::Bar,
+                    };
+                    let mut native = Dataset::default()
+                        .data(data)
+                        .graph_type(graph_type)
+                        .marker(ratatui::symbols::Marker::Dot)
+                        .style(native_style(&dataset.style));
+                    if let Some(name) = &dataset.name {
+                        native = native.name(name.as_str());
+                    }
+                    native
+                })
+                .collect();
+            frame.render_widget(
+                Chart::new(datasets)
+                    .x_axis(native_axis(x_axis))
+                    .y_axis(native_axis(y_axis))
+                    .style(native_style(style)),
+                area,
+            );
+        }
+        Node::Scrollbar {
+            id,
+            content_length,
+            position,
+            viewport_content_length,
+            orientation,
+            style,
+        } => {
+            let orientation = match orientation {
+                ScrollbarOrientation::VerticalRight => NativeScrollbarOrientation::VerticalRight,
+                ScrollbarOrientation::VerticalLeft => NativeScrollbarOrientation::VerticalLeft,
+                ScrollbarOrientation::HorizontalBottom => {
+                    NativeScrollbarOrientation::HorizontalBottom
+                }
+                ScrollbarOrientation::HorizontalTop => NativeScrollbarOrientation::HorizontalTop,
+            };
+            let mut state = ScrollbarState::new(*content_length as usize)
+                .position(*position as usize)
+                .viewport_content_length(*viewport_content_length as usize);
+            frame.render_stateful_widget(
+                Scrollbar::new(orientation).style(native_style(style)),
+                area,
+                &mut state,
+            );
+            // Scrollbar rendering does not adjust position; JS owns scrolling.
+            updates.push(WidgetStateUpdate {
+                id: id.clone(),
+                offset: *position,
+                selected: None,
+            });
+        }
         Node::List {
             id,
             items,
@@ -170,6 +314,31 @@ fn render_node(
             });
         }
     }
+}
+
+fn native_constraint(constraint: &Constraint) -> NativeConstraint {
+    match *constraint {
+        Constraint::Length { value } => NativeConstraint::Length(value),
+        Constraint::Min { value } => NativeConstraint::Min(value),
+        Constraint::Max { value } => NativeConstraint::Max(value),
+        Constraint::Percentage { value } => NativeConstraint::Percentage(value),
+        Constraint::Fill { value } => NativeConstraint::Fill(value),
+    }
+}
+
+fn native_row(row: &[TextLine]) -> TableRow<'_> {
+    TableRow::new(row.iter().map(|cell| Cell::from(native_line(cell))))
+}
+
+fn native_axis(axis: &ChartAxis) -> Axis<'_> {
+    let mut native = Axis::default()
+        .bounds(axis.bounds)
+        .labels(axis.labels.iter().map(native_line).collect::<Vec<_>>())
+        .style(native_style(&axis.style));
+    if let Some(title) = &axis.title {
+        native = native.title(title.as_str());
+    }
+    native
 }
 
 fn native_line(line: &TextLine) -> Line<'_> {

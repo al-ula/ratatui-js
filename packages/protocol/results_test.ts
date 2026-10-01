@@ -69,3 +69,17 @@ Deno.test("reject malformed extended input and unknown key flags", () => {
     ]
   ) assertThrows(() => decodeEvent(event), TypeError);
 });
+
+Deno.test("shared widget rendering results decode at the adapter boundary", async () => {
+  const fixtures = JSON.parse(
+    await Deno.readTextFile("tests/fixtures/frames.json"),
+  );
+  for (const fixture of fixtures.valid) {
+    const result = {
+      width: fixture.width,
+      height: fixture.height,
+      widgetStates: fixture.expectedStates,
+    };
+    assertEquals(decodeRenderResult(result), result);
+  }
+});
