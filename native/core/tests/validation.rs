@@ -163,3 +163,15 @@ fn direct_rust_numeric_widget_inputs_are_validated_before_drawing() {
         ErrorCode::InvalidFrame
     );
 }
+
+#[test]
+fn style_serialization_preserves_inheritance_and_explicit_removal() {
+    for value in [
+        json!({}),
+        json!({"bold": false, "dim": true, "italic": false, "underlined": true, "reversed": false, "crossedOut": true}),
+        json!({"fg": {"rgb": [0, 128, 255]}, "bg": {"indexed": 255}}),
+    ] {
+        let style: ratatui_js_core::Style = serde_json::from_value(value.clone()).unwrap();
+        assert_eq!(serde_json::to_value(style).unwrap(), value);
+    }
+}

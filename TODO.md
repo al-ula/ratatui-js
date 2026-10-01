@@ -22,12 +22,12 @@
 
 ## Richer styling
 
-- [ ] Add RGB and indexed colors alongside the existing named colors.
-- [ ] Add explicit modifier removal so child styles can override inherited
+- [x] Add RGB and indexed colors alongside the existing named colors.
+- [x] Add explicit modifier removal so child styles can override inherited
       modifiers.
-- [ ] Keep TypeScript and Rust style schemas and validation aligned, and
+- [x] Keep TypeScript and Rust style schemas and validation aligned, and
       document inheritance and override behavior.
-- [ ] Test color boundaries, invalid style values, and rendered style overrides.
+- [x] Test color boundaries, invalid style values, and rendered style overrides.
 
 ## Custom terminal streams
 

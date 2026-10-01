@@ -26,8 +26,11 @@ export type Color =
   | "lightBlue"
   | "lightMagenta"
   | "lightCyan"
-  | "white";
+  | "white"
+  | { readonly rgb: readonly [number, number, number] }
+  | { readonly indexed: number };
 
+/** Omitted fields inherit; true adds a modifier and false removes it. */
 export interface Style {
   readonly fg?: Color;
   readonly bg?: Color;

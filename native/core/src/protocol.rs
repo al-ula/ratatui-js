@@ -20,7 +20,7 @@ where
     T::deserialize(deserializer).map(Some)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Color {
     Black,
@@ -39,10 +39,71 @@ pub enum Color {
     LightMagenta,
     LightCyan,
     White,
+    Rgb(u8, u8, u8),
+    Indexed(u8),
+}
+
+// A derived enum decoder also accepts {"red": null}. Only named strings and
+// the two documented color objects are part of the shared wire schema.
+impl<'de> Deserialize<'de> for Color {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct ColorVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for ColorVisitor {
+            type Value = Color;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a named color string, RGB object, or indexed color object")
+            }
+
+            fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Color, E> {
+                match value {
+                    "black" => Ok(Color::Black),
+                    "red" => Ok(Color::Red),
+                    "green" => Ok(Color::Green),
+                    "yellow" => Ok(Color::Yellow),
+                    "blue" => Ok(Color::Blue),
+                    "magenta" => Ok(Color::Magenta),
+                    "cyan" => Ok(Color::Cyan),
+                    "gray" => Ok(Color::Gray),
+                    "darkGray" => Ok(Color::DarkGray),
+                    "lightRed" => Ok(Color::LightRed),
+                    "lightGreen" => Ok(Color::LightGreen),
+                    "lightYellow" => Ok(Color::LightYellow),
+                    "lightBlue" => Ok(Color::LightBlue),
+                    "lightMagenta" => Ok(Color::LightMagenta),
+                    "lightCyan" => Ok(Color::LightCyan),
+                    "white" => Ok(Color::White),
+                    _ => Err(E::custom("unknown named color")),
+                }
+            }
+
+            fn visit_map<M: serde::de::MapAccess<'de>>(
+                self,
+                mut map: M,
+            ) -> Result<Color, M::Error> {
+                let color = match map.next_key::<String>()?.as_deref() {
+                    Some("rgb") => {
+                        let [r, g, b] = map.next_value::<[u8; 3]>()?;
+                        Color::Rgb(r, g, b)
+                    }
+                    Some("indexed") => Color::Indexed(map.next_value::<u8>()?),
+                    _ => return Err(serde::de::Error::custom("expected rgb or indexed")),
+                };
+                if map.next_key::<serde::de::IgnoredAny>()?.is_some() {
+                    return Err(serde::de::Error::custom("expected exactly one color field"));
+                }
+                Ok(color)
+            }
+        }
+
+        deserializer.deserialize_any(ColorVisitor)
+    }
 }
 
 #[derive(Debug, Default, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+// Omitted fields inherit; explicit false removes an inherited modifier.
 pub struct Style {
     #[serde(
         default,
@@ -56,18 +117,42 @@ pub struct Style {
         skip_serializing_if = "Option::is_none"
     )]
     pub bg: Option<Color>,
-    #[serde(default)]
-    pub bold: bool,
-    #[serde(default)]
-    pub dim: bool,
-    #[serde(default)]
-    pub italic: bool,
-    #[serde(default)]
-    pub underlined: bool,
-    #[serde(default)]
-    pub reversed: bool,
-    #[serde(default)]
-    pub crossed_out: bool,
+    #[serde(
+        default,
+        deserialize_with = "supplied",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub bold: Option<bool>,
+    #[serde(
+        default,
+        deserialize_with = "supplied",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub dim: Option<bool>,
+    #[serde(
+        default,
+        deserialize_with = "supplied",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub italic: Option<bool>,
+    #[serde(
+        default,
+        deserialize_with = "supplied",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub underlined: Option<bool>,
+    #[serde(
+        default,
+        deserialize_with = "supplied",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub reversed: Option<bool>,
+    #[serde(
+        default,
+        deserialize_with = "supplied",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub crossed_out: Option<bool>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -177,7 +262,7 @@ fn default_column_spacing() -> u16 {
 
 fn default_highlight_style() -> Style {
     Style {
-        reversed: true,
+        reversed: Some(true),
         ..Style::default()
     }
 }

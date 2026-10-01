@@ -78,12 +78,31 @@ const MODIFIERS = [
   "crossedOut",
 ];
 
+function color(value: unknown, path: string): void {
+  if (typeof value === "string") {
+    if (!COLORS.has(value)) invalid(path, "unknown color");
+    return;
+  }
+  const record = object(value, path, ["rgb", "indexed"]);
+  if (Object.keys(record).length !== 1) {
+    invalid(path, "expected exactly one of rgb or indexed");
+  }
+  if ("rgb" in record) {
+    if (!Array.isArray(record.rgb) || record.rgb.length !== 3) {
+      invalid(`${path}.rgb`, "expected three color channels");
+    }
+    for (const [index, channel] of record.rgb.entries()) {
+      integer(channel, `${path}.rgb[${index}]`, 255);
+    }
+  } else {
+    integer(record.indexed, `${path}.indexed`, 255);
+  }
+}
+
 function style(value: unknown, path: string): void {
   const record = object(value, path, ["fg", "bg", ...MODIFIERS]);
   for (const field of ["fg", "bg"]) {
-    if (record[field] !== undefined && !COLORS.has(record[field] as string)) {
-      invalid(`${path}.${field}`, "unknown color");
-    }
+    if (record[field] !== undefined) color(record[field], `${path}.${field}`);
   }
   for (const field of MODIFIERS) {
     if (record[field] !== undefined) boolean(record[field], `${path}.${field}`);

@@ -365,8 +365,10 @@ fn native_style(style: &Style) -> NativeStyle {
         (style.reversed, Modifier::REVERSED),
         (style.crossed_out, Modifier::CROSSED_OUT),
     ] {
-        if enabled {
-            native = native.add_modifier(modifier);
+        match enabled {
+            Some(true) => native = native.add_modifier(modifier),
+            Some(false) => native = native.remove_modifier(modifier),
+            None => {}
         }
     }
     native
@@ -390,5 +392,7 @@ fn native_color(color: Color) -> NativeColor {
         Color::LightMagenta => NativeColor::LightMagenta,
         Color::LightCyan => NativeColor::LightCyan,
         Color::White => NativeColor::White,
+        Color::Rgb(r, g, b) => NativeColor::Rgb(r, g, b),
+        Color::Indexed(index) => NativeColor::Indexed(index),
     }
 }

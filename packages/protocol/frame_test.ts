@@ -161,3 +161,61 @@ Deno.test("new numeric widget inputs reject nonfinite values before encoding", (
     }
   }
 });
+
+const styleFixtures: {
+  valid: { name: string; style: unknown }[];
+  invalid: { name: string; style: unknown }[];
+} = JSON.parse(
+  await Deno.readTextFile(
+    new URL("../../tests/fixtures/styles.json", import.meta.url),
+  ),
+);
+
+for (const [kind, fixtures] of Object.entries(styleFixtures)) {
+  for (const fixture of fixtures) {
+    Deno.test(`shared ${kind} style: ${fixture.name}`, () => {
+      const description = {
+        protocolVersion: 1,
+        root: {
+          type: "paragraph",
+          lines: [[{ text: "x" }]],
+          style: fixture.style,
+        },
+      };
+      if (kind === "valid") {
+        validateFrame(description);
+        assertEquals(
+          JSON.parse(new TextDecoder().decode(encodeFrame(description))),
+          description,
+        );
+      } else {
+        const error = assertThrows(
+          () => validateFrame(description),
+          FrameError,
+        );
+        assertEquals(error.code, "invalidFrame");
+      }
+    });
+  }
+}
+
+Deno.test("nonfinite color values are rejected before JSON encoding", () => {
+  for (const value of [NaN, Infinity, -Infinity]) {
+    for (
+      const color of [
+        { indexed: value },
+        { rgb: [value, 0, 0] as const },
+        { rgb: [0, value, 0] as const },
+        { rgb: [0, 0, value] as const },
+      ]
+    ) {
+      assertThrows(
+        () =>
+          encodeFrame(
+            frame({ type: "paragraph", lines: [], style: { fg: color } }),
+          ),
+        FrameError,
+      );
+    }
+  }
+});

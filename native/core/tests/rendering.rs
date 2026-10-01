@@ -277,3 +277,129 @@ fn additional_widget_styles_reach_the_cell_buffer() {
         );
     }
 }
+
+#[test]
+fn richer_colors_and_each_modifier_override_reach_rendered_cells() {
+    for (name, modifier) in [
+        ("bold", Modifier::BOLD),
+        ("dim", Modifier::DIM),
+        ("italic", Modifier::ITALIC),
+        ("underlined", Modifier::UNDERLINED),
+        ("reversed", Modifier::REVERSED),
+        ("crossedOut", Modifier::CROSSED_OUT),
+    ] {
+        let mut renderer = renderer(4, 1);
+        let frame = json!({"protocolVersion": 1, "root": {
+            "type": "paragraph", "style": {"fg": {"rgb": [0, 128, 255]}, "bg": {"indexed": 255}, name: true},
+            "lines": [[
+                {"text": "a"},
+                {"text": "b", "style": {name: false, "fg": {"indexed": 0}}},
+                {"text": "c", "style": {name: true, "bg": {"rgb": [255, 0, 128]}}}
+            ]]
+        }});
+        renderer
+            .render_json(&serde_json::to_vec(&frame).unwrap())
+            .unwrap();
+        let buffer = renderer.terminal().backend().buffer();
+        assert_eq!(buffer[(0, 0)].fg, Color::Rgb(0, 128, 255));
+        assert_eq!(buffer[(0, 0)].bg, Color::Indexed(255));
+        assert!(buffer[(0, 0)].modifier.contains(modifier), "{name}");
+        assert_eq!(buffer[(1, 0)].fg, Color::Indexed(0));
+        assert_eq!(buffer[(1, 0)].bg, Color::Indexed(255));
+        assert!(!buffer[(1, 0)].modifier.contains(modifier), "{name}");
+        assert_eq!(buffer[(2, 0)].fg, Color::Rgb(0, 128, 255));
+        assert_eq!(buffer[(2, 0)].bg, Color::Rgb(255, 0, 128));
+        assert!(buffer[(2, 0)].modifier.contains(modifier), "{name}");
+        // Removal in one span must not affect the adjacent span or padding.
+        assert!(buffer[(3, 0)].modifier.contains(modifier), "{name}");
+    }
+}
+
+#[test]
+fn child_widgets_remove_block_modifiers_and_can_add_them_back() {
+    for parent_enabled in [true, false] {
+        let mut renderer = renderer(5, 3);
+        let frame = json!({"protocolVersion": 1, "root": {
+            "type": "block", "style": {"bold": parent_enabled, "fg": {"rgb": [255, 0, 0]}},
+            "child": {"type": "paragraph", "style": {"bold": !parent_enabled}, "lines": [[
+                {"text": "a"}, {"text": "b", "style": {"bold": parent_enabled, "fg": {"indexed": 42}}}
+            ]]}
+        }});
+        renderer
+            .render_json(&serde_json::to_vec(&frame).unwrap())
+            .unwrap();
+        let buffer = renderer.terminal().backend().buffer();
+        assert_eq!(
+            buffer[(1, 1)].modifier.contains(Modifier::BOLD),
+            !parent_enabled
+        );
+        assert_eq!(
+            buffer[(2, 1)].modifier.contains(Modifier::BOLD),
+            parent_enabled
+        );
+        assert_eq!(buffer[(1, 1)].fg, Color::Rgb(255, 0, 0));
+        assert_eq!(buffer[(2, 1)].fg, Color::Indexed(42));
+    }
+}
+
+#[test]
+fn selection_highlights_can_remove_content_modifiers() {
+    for root in [
+        json!({"type":"list", "id":"l", "items":[[{"text":"a", "style":{"bold":true}}]], "selected":0, "style":{"italic":true}, "highlightStyle":{"bold":false,"italic":false,"fg":{"rgb":[1,2,3]}}}),
+        json!({"type":"table", "id":"t", "rows":[[[{"text":"a", "style":{"bold":true}}]]], "widths":[{"kind":"fill","value":1}], "selected":0, "style":{"italic":true}, "highlightStyle":{"bold":false,"italic":false,"fg":{"rgb":[1,2,3]}}}),
+        json!({"type":"tabs", "id":"t", "titles":[[{"text":"a", "style":{"bold":true}}]], "selected":0, "style":{"italic":true}, "highlightStyle":{"bold":false,"italic":false,"fg":{"rgb":[1,2,3]}}}),
+    ] {
+        let mut renderer = renderer(4, 1);
+        renderer
+            .render_json(&serde_json::to_vec(&json!({"protocolVersion":1,"root":root})).unwrap())
+            .unwrap();
+        let cell = renderer
+            .terminal()
+            .backend()
+            .buffer()
+            .content
+            .iter()
+            .find(|cell| cell.symbol() == "a")
+            .unwrap();
+        assert_eq!(cell.fg, Color::Rgb(1, 2, 3), "{root}");
+        assert!(
+            !cell.modifier.intersects(Modifier::BOLD | Modifier::ITALIC),
+            "{root}"
+        );
+    }
+}
+
+#[test]
+fn shared_style_schemas_accept_valid_values_and_reject_invalid_values_before_drawing() {
+    let fixtures: Value =
+        serde_json::from_str(include_str!("../../../tests/fixtures/styles.json")).unwrap();
+    let mut renderer = renderer(1, 1);
+    for case in fixtures["valid"].as_array().unwrap() {
+        let style: ratatui_js_core::Style = serde_json::from_value(case["style"].clone()).unwrap();
+        assert_eq!(
+            serde_json::to_value(style).unwrap(),
+            case["style"],
+            "{}",
+            case["name"]
+        );
+        renderer.render_json(&serde_json::to_vec(&json!({
+            "protocolVersion": 1,
+            "root": {"type": "paragraph", "lines": [[{"text": "x"}]], "style": case["style"]}
+        })).unwrap()).unwrap();
+    }
+    let before = renderer.terminal().backend().buffer().clone();
+    for case in fixtures["invalid"].as_array().unwrap() {
+        let error = renderer.render_json(&serde_json::to_vec(&json!({
+            "protocolVersion": 1,
+            "root": {"type": "paragraph", "lines": [[{"text": "y"}]], "style": case["style"]}
+        })).unwrap()).unwrap_err();
+        assert_eq!(error.code(), ErrorCode::InvalidFrame, "{}", case["name"]);
+        assert!(error.description().path.is_some(), "{}", case["name"]);
+        assert_eq!(
+            renderer.terminal().backend().buffer(),
+            &before,
+            "{}",
+            case["name"]
+        );
+    }
+}

@@ -7,6 +7,10 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 
 ### Added
 
+- RGB and indexed style colors, with shared TypeScript/Rust validation.
+- Explicit `false` style modifiers remove inherited modifiers; omitted modifiers
+  continue to inherit. Previously `false` was additive and had no effect.
+
 - Table, tabs, gauge, chart, and scrollbar nodes with typed builders, shared
   validation, native rendering, and headless fixtures.
 - Explicit JavaScript-owned widget state and render-result updates for tables,

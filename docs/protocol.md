@@ -40,9 +40,26 @@ validation provides earlier application errors.
 - Paragraph wrapping defaults to false. When true, use Ratatui wrapping with
   `trim: false`. Without wrapping, excess text is clipped.
 - Unicode grapheme width and wide-cell handling belong to Ratatui, not TS.
-- Styles support the named colors and additive boolean modifiers listed in the
-  TS schema. Omitted/false modifiers add nothing; they do not remove inherited
-  modifiers. Span styles patch widget styles.
+- Style `fg` and `bg` accept the named colors listed in the TS schema,
+  `{ "rgb": [r, g, b] }`, or `{ "indexed": n }`. RGB channels and palette
+  indices must be integers from 0 through 255 inclusive. Color objects contain
+  exactly one key; RGB arrays contain exactly three channels. Actual color
+  appearance depends on terminal support and its palette.
+- Omitted style fields inherit the underlying style. A supplied foreground or
+  background replaces that color. For `bold`, `dim`, `italic`, `underlined`,
+  `reversed`, and `crossedOut`, `true` adds the modifier and explicit `false`
+  removes it. Unlike the previous additive behavior, `false` now overrides an
+  inherited modifier. Null values and unknown style fields are rejected.
+- Span styles patch widget styles, including table cell spans. Selection
+  highlights patch the selected content after its own style, so a highlight can
+  remove a span modifier. Block styles paint their area before children render:
+  unspecified child fields retain that underlying cell style. Child widgets can
+  override colors and remove modifiers with explicit values.
+
+For example, a paragraph with
+`style: { fg: { rgb: [255, 128, 0] }, bold: true }` can contain a span with
+`style: { fg: { indexed: 42 }, bold: false }` to change its foreground and
+remove bold while preserving the paragraph background.
 
 ## Lists
 
