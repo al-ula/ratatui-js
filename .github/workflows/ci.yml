@@ -1,0 +1,46 @@
+name: Checks and terminal integration
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  checks:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.6
+      - run: rustup toolchain install 1.98.0 --profile minimal --component clippy,rustfmt
+      - run: rustup default 1.98.0
+      - name: Configure MSVC compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installation = & "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath
+          cmd /c "`"$installation/Common7/Tools/VsDevCmd.bat`" -arch=x64 && set" | ForEach-Object {
+            if ($_ -match '^([^=]+)=(.*)$') { "$($matches[1])=$($matches[2])" >> $env:GITHUB_ENV }
+          }
+      - run: deno task check
+      - run: deno task test
+      - run: deno task lint
+      - run: deno fmt --check packages docs examples tests/fixtures tests/integration/*.ts README.md deno.json
+      - run: cargo fmt --manifest-path native/Cargo.toml --all --check
+      - run: cargo test --manifest-path native/Cargo.toml --locked
+      - run: cargo clippy --manifest-path native/Cargo.toml --all-targets --locked -- -D warnings
+      - run: python tests/integration/releases_test.py
+      - run: python tests/integration/run.py
+      - run: python scripts/package-native.py --verified
+      - run: python tests/integration/package.py
+      - uses: actions/upload-artifact@v7
+        with:
+          name: native-bundle-${{ matrix.os }}
+          path: dist/*.zip
+          if-no-files-found: error

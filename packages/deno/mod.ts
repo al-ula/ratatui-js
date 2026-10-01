@@ -1,3 +1,7 @@
+import {
+  materializeNativeLibrary,
+  type NativeLibrary,
+} from "@ratatui-js/native";
 /** Real terminal adapter for Deno. Requires --allow-ffi for the native library. */
 import type {
   PlatformAdapter,
@@ -56,27 +60,42 @@ export class NativeError extends Error {
   }
 }
 
-export function nativeLibraryPath(): URL {
-  const { os, arch } = Deno.build;
-  if (
-    !["linux", "darwin", "windows"].includes(os) ||
-    !["x86_64", "aarch64"].includes(arch)
-  ) {
-    throw new Error(`Unsupported native target: ${os}-${arch}`);
-  }
-  const file = os === "windows"
-    ? "ratatui_js_ffi.dll"
-    : os === "darwin"
-    ? "libratatui_js_ffi.dylib"
-    : "libratatui_js_ffi.so";
-  return new URL(`./native/${os}-${arch}/${file}`, import.meta.url);
+// Extracted copies have independent Rust globals. Coordinate adapters here so
+// repeated materialization cannot bypass terminal ownership or poison state.
+let terminalOwnership: "available" | "busy" | "poisoned" = "available";
+function restorationFailed(error: unknown): boolean {
+  if (error instanceof AggregateError) return true;
+  return error instanceof NativeError &&
+    ["terminalPoisoned", "initialization", "shutdown", "panic"].includes(
+      error.description.code,
+    );
 }
 
-/** An explicit library path supports local builds; packaged builds resolve by target. */
+/** An explicit path supports local builds; otherwise use bundled JSR native assets. */
 export class DenoAdapter implements PlatformAdapter {
-  constructor(readonly libraryPath: string | URL = nativeLibraryPath()) {}
+  constructor(readonly libraryPath?: string | URL) {}
 
   async open(options: TerminalOptions = {}): Promise<TerminalDriver> {
+    if (terminalOwnership !== "available") {
+      throw new NativeError({
+        code: terminalOwnership === "poisoned"
+          ? "terminalPoisoned"
+          : "terminalBusy",
+        message: terminalOwnership === "poisoned"
+          ? "Terminal ownership is poisoned after failed restoration"
+          : "A terminal session is already open",
+      });
+    }
+    terminalOwnership = "busy";
+    try {
+      return await this.#open(options);
+    } catch (failure) {
+      terminalOwnership = restorationFailed(failure) ? "poisoned" : "available";
+      throw failure;
+    }
+  }
+
+  async #open(options: TerminalOptions): Promise<TerminalDriver> {
     if (
       options.alternateScreen !== undefined &&
       typeof options.alternateScreen !== "boolean"
@@ -90,7 +109,32 @@ export class DenoAdapter implements PlatformAdapter {
         "Native pointer access requires --allow-ffi (without a path restriction)",
       );
     }
-    const library = Deno.dlopen(this.libraryPath, symbols);
+    const native = this.libraryPath === undefined
+      ? await materializeNativeLibrary()
+      : undefined;
+    let library: Library;
+    try {
+      if (
+        native &&
+        (native.abiVersion !== ABI_VERSION ||
+          native.protocolVersion !== PROTOCOL_VERSION)
+      ) {
+        throw new Error(
+          "Bundled native version metadata does not match the adapter",
+        );
+      }
+      library = Deno.dlopen(this.libraryPath ?? native!.path, symbols);
+    } catch (failure) {
+      try {
+        await native?.dispose();
+      } catch (cleanup) {
+        throw new AggregateError(
+          [failure, cleanup],
+          "Native loading cleanup failed",
+        );
+      }
+      throw failure;
+    }
     let handle: Deno.PointerValue = null;
     const error = new Uint8Array(16);
     try {
@@ -118,18 +162,34 @@ export class DenoAdapter implements PlatformAdapter {
       const result = takeBytes(library, error);
       checkStatus(status, result, [0]);
       if (!handle) throw new TypeError("Native create returned no handle");
-      return new DenoDriver(library, handle);
+      return new DenoDriver(library, handle, native);
     } catch (failure) {
       // A malformed successful create must still release any returned handle.
-      if (handle) {
-        const cleanup = new Uint8Array(16);
+      const failures: unknown[] = [failure];
+      try {
+        if (handle) {
+          const cleanup = new Uint8Array(16);
+          try {
+            const status = await library.symbols.rt_destroy(handle, cleanup);
+            checkStatus(status, takeBytes(library, cleanup), [0]);
+          } catch (error) {
+            failures.push(error);
+          }
+        }
+      } finally {
+        library.close();
         try {
-          await library.symbols.rt_destroy(handle, cleanup);
-        } finally {
-          takeBytes(library, cleanup);
+          await native?.dispose();
+        } catch (error) {
+          failures.push(error);
         }
       }
-      library.close();
+      if (failures.length > 1) {
+        throw new AggregateError(
+          failures,
+          "Session creation and cleanup failed",
+        );
+      }
       throw failure;
     }
   }
@@ -184,7 +244,11 @@ class DenoDriver implements TerminalDriver {
   #close: Promise<void> | undefined;
   #renders: Promise<unknown> = Promise.resolve();
   #waiting: Promise<TerminalEvent | null> | undefined;
-  constructor(readonly library: Library, readonly handle: Deno.PointerValue) {}
+  constructor(
+    readonly library: Library,
+    readonly handle: Deno.PointerValue,
+    readonly native: NativeLibrary | undefined,
+  ) {}
 
   render(frame: FrameDescription): Promise<RenderResult> {
     if (this.#closing) {
@@ -294,6 +358,14 @@ class DenoDriver implements TerminalDriver {
       }
     } finally {
       this.library.close();
+      // A failed native shutdown must remain poisoned even after unloading the
+      // particular extracted library instance and its Rust ownership guard.
+      terminalOwnership = failures.length ? "poisoned" : "available";
+      try {
+        await this.native?.dispose();
+      } catch (error) {
+        failures.push(error);
+      }
     }
     if (failures.length) {
       throw new AggregateError(failures, "Terminal restoration failed");

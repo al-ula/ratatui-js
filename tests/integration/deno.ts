@@ -1,11 +1,22 @@
+import { consoleModes } from "./console_modes.ts";
 import { assertEquals, assertRejects } from "@std/assert";
 import { createFrame } from "@ratatui-js/core";
-import { DenoAdapter, onInterrupt } from "../../packages/deno/mod.ts";
+import {
+  DenoAdapter,
+  NativeError,
+  onInterrupt,
+} from "../../packages/deno/mod.ts";
 const [library, scenario] = Deno.args;
 if (!library) throw new Error("Pass a native library path");
+const modes = consoleModes();
 const driver = await new DenoAdapter(library).open({
   alternateScreen: scenario !== "no-alternate",
 });
+const busy = await assertRejects(
+  () => new DenoAdapter(library).open({}),
+  NativeError,
+);
+assertEquals(busy.description.code, "terminalBusy");
 const failures: unknown[] = [];
 const detach = onInterrupt(driver, (error) => failures.push(error));
 const frame = createFrame({
@@ -46,3 +57,5 @@ try {
   }
 }
 assertEquals(failures, []);
+
+modes.verify();

@@ -15,15 +15,16 @@ call JS components through FFI. Ratatui's borrowed `Frame` never leaves Rust.
 ## Package boundaries
 
 - `@ratatui-js/protocol` contains runtime-independent wire types and validation.
-- `@ratatui-js/core` exposes the platform contract and frame creation. The
-  optional application runner and builders will live here.
+- `@ratatui-js/core` exposes the platform contract, frame creation, application
+  runner, and UI builders.
 - `@ratatui-js/deno`, and later Bun and Node adapters, implement the same
   contract.
 - `native/core` is generic over a Ratatui backend.
 - `native/crossterm` owns the Crossterm terminal lifecycle and input; see
   [backend design](backend-design.md).
-- A future `native/ffi` crate will expose the renderer and session through a
-  C-compatible ABI.
+- `native/ffi` exposes the renderer and session through a C-compatible ABI.
+- `@ratatui-js/native` bundles verified library bytes for JSR; the Deno adapter
+  materializes a checksummed local copy and removes it after unloading.
 
 Workspace package names resolve locally through Deno. No published package or
 native binary is needed to develop the foundation.
@@ -41,7 +42,7 @@ Platform drivers must serialize renders, allow one outstanding input wait, and
 wake that wait when closed. An event wait must not hold the render lock. Closing
 must finish pending operations before freeing a handle or unloading a library.
 
-The pure TS application runner will handle initial drawing, serialized model
+The pure TS application runner handles initial drawing, serialized model
 updates, resize invalidation, redraw coalescing, and cleanup in `finally`. Input
 reader threads are infrastructure, not a second application loop.
 
@@ -49,6 +50,6 @@ reader threads are infrastructure, not a second application loop.
 
 The protocol, driver contracts, frame creation, headless rendering, and native
 Crossterm sessions exist today. Sessions implement terminal ownership, native
-input, and shutdown synchronization. C ABI, platform FFI adapters, and the
-application runner remain separate implementation milestones. Real-terminal
-integration is verified on Linux; macOS and Windows remain unverified.
+input, and shutdown synchronization. The C ABI, Deno FFI adapter, application
+runner, and UI builders are implemented. Real-terminal integration is verified
+on Linux; macOS and Windows remain unverified.

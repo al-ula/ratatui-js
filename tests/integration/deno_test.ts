@@ -17,7 +17,19 @@ for (
 ) {
   Deno.test(`${name} version mismatch rejects before terminal creation`, async () => {
     const error = await assertRejects(
-      () => new DenoAdapter(new URL(`${name}.so`, root)).open({}),
+      () =>
+        new DenoAdapter(
+          new URL(
+            `${name}.${
+              Deno.build.os === "windows"
+                ? "dll"
+                : Deno.build.os === "darwin"
+                ? "dylib"
+                : "so"
+            }`,
+            root,
+          ),
+        ).open({}),
       NativeError,
     );
     assertEquals(error.description.code, code);
@@ -34,4 +46,35 @@ Deno.test("real library rejects redirected terminal", async () => {
     NativeError,
   );
   assertEquals(error.description.code, "notTerminal");
+});
+Deno.test("malformed results free buffers and shutdown reports restoration errors", async () => {
+  const extension = Deno.build.os === "windows"
+    ? "dll"
+    : Deno.build.os === "darwin"
+    ? "dylib"
+    : "so";
+  const driver = await new DenoAdapter(new URL(`failures.${extension}`, root))
+    .open({});
+  await assertRejects(
+    () =>
+      driver.render({
+        protocolVersion: 1,
+        root: { type: "paragraph", lines: [] },
+      }),
+    SyntaxError,
+  );
+  await assertRejects(
+    () => driver.nextEvent(),
+    TypeError,
+    "Invalid key character",
+  );
+  const error = await assertRejects(() => driver.close(), AggregateError);
+  assertEquals(error.errors[0].description.code, "shutdown");
+  const repeated = await assertRejects(() => driver.close(), AggregateError);
+  assertEquals(repeated, error);
+  const poisoned = await assertRejects(
+    () => new DenoAdapter(new URL(`failures.${extension}`, root)).open({}),
+    NativeError,
+  );
+  assertEquals(poisoned.description.code, "terminalPoisoned");
 });

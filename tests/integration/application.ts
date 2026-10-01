@@ -1,3 +1,4 @@
+import { consoleModes } from "./console_modes.ts";
 import { assertEquals } from "@std/assert";
 import {
   column,
@@ -9,6 +10,7 @@ import {
 import { DenoAdapter, onInterrupt } from "../../packages/deno/mod.ts";
 const [library, scenario] = Deno.args;
 if (!library) throw new Error("Pass library path");
+const modes = consoleModes();
 const driver = await new DenoAdapter(library).open({
   alternateScreen: scenario !== "no-alternate",
 });
@@ -65,3 +67,5 @@ try {
   detach();
 }
 assertEquals(errors, []);
+
+modes.verify();

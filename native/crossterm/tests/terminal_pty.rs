@@ -1,6 +1,6 @@
-//! Opt-in Linux PTY tests. Python supplies the PTY/termios operations without
+//! Opt-in Unix PTY tests. Python supplies the PTY/termios operations without
 //! adding an unsafe test-only FFI boundary or another native dependency.
-#![cfg(target_os = "linux")]
+#![cfg(unix)]
 
 use std::{
     process::Command,
@@ -18,7 +18,7 @@ const FRAME: &[u8] =
     br#"{"protocolVersion":1,"root":{"type":"paragraph","lines":[[{"text":"PTY frame"}]]}}"#;
 
 #[test]
-#[ignore = "requires Linux PTY support and python3; run explicitly"]
+#[ignore = "requires Unix PTY support and python3; run explicitly"]
 fn real_terminal_lifecycle() {
     let output = Command::new("python3")
         .arg("-c")

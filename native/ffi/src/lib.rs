@@ -145,7 +145,9 @@ pub unsafe extern "C" fn rt_render(
             return Err(invalid("null render argument"));
         }
         if len > ratatui_js_core::MAX_FRAME_BYTES {
-            return Err(invalid("frame byte limit exceeded"));
+            let mut error = ErrorDescription::new("invalidFrame", "$: encoded frame is too large");
+            error.path = Some("$".into());
+            return Err(Box::new(error));
         }
         let result = unsafe { (&*handle).render_json(slice::from_raw_parts(data, len)) }
             .map_err(|e| Box::new(e.description()))?;

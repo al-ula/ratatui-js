@@ -1,9 +1,9 @@
 # Native terminal backend design
 
-**The Rust Crossterm session milestone is implemented. C ABI and Deno bindings
-remain unimplemented.** This document records the backend design. Linux PTY
-integration is verified; macOS and Windows are not. ABI signatures and Deno
-bindings remain separate milestones described in [native ABI](native-abi.md).
+The Rust Crossterm session, C ABI, and Deno adapter are implemented. This
+document records their backend design. Linux PTY integration is verified; macOS
+and Windows remain unverified. See [native ABI](native-abi.md) for the public
+header and cross-language ownership contract.
 
 ## Goals and scope
 
@@ -24,9 +24,9 @@ recommends Crossterm for general-purpose applications. Termion, Termwiz, and
 Termina do not currently provide a project-specific reason to add more backends.
 
 ```text
-packages/core              Application state and scheduling (future runner)
-packages/deno              Native loading, FFI calls, buffer ownership (future)
-native/ffi                 C ABI, handles, panic containment (future)
+packages/core              Application state and scheduling
+packages/deno              Native loading, FFI calls, buffer ownership
+native/ffi                 C ABI, handles, panic containment
 native/crossterm           Terminal ownership, input, synchronization (existing)
 native/core                Validation and Renderer<B: Backend> (existing)
 ```
@@ -211,10 +211,10 @@ Document this distinction from terminal-mode cleanup.
 
 ## FFI and adapter integration
 
-The proposed ABI delegates terminal work to this session instead of maintaining
-another lifecycle. Event, timeout, closed, and error outcomes remain distinct.
-Closing never destroys the handle. The caller must finish all outstanding calls
-before destruction; output buffers must be freed before library unload.
+The ABI delegates terminal work to this session instead of maintaining another
+lifecycle. Event, timeout, closed, and error outcomes remain distinct. Closing
+never destroys the handle. The caller must finish all outstanding calls before
+destruction; output buffers must be freed before library unload.
 
 The Deno adapter serializes render submissions, rejects a second `nextEvent()`,
 and uses nonblocking FFI bindings for potentially blocking operations. It maps

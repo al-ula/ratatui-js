@@ -1,0 +1,44 @@
+name: Publish tagged release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  versions:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/verify-release.py "$GITHUB_REF_NAME"
+  verify:
+    needs: versions
+    uses: ./.github/workflows/ci.yml
+  publish:
+    needs: verify
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      # JSR exchanges the GitHub OIDC identity; no stored registry token.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.6
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: native-bundle-*
+          path: release-bundles
+          merge-multiple: true
+      - run: python3 scripts/prepare-jsr.py release-bundles
+      - run: deno fmt packages/native/artifacts.ts
+      - run: deno publish --dry-run --allow-dirty
+      - run: deno publish --allow-dirty
+      # GitHub Releases use the run-scoped built-in token, not a stored secret.
+      - name: Publish native archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release-bundles/*.zip --verify-tag --generate-notes

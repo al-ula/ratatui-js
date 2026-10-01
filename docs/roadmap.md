@@ -111,20 +111,24 @@ public API and tests verify cleanup on both normal exit and failure.
 
 ## Platform verification and release packaging
 
-This work can proceed after ABI and adapter integration. Each platform needs its
-own verification before it is advertised as supported.
+Linux is verified locally. CI and native bundle packaging are implemented; macOS
+PTY and Windows ConPTY coverage are configured but have not run here. The
+milestone remains incomplete until those platform runs pass. See
+[release instructions and target matrix](releases.md).
 
-- [ ] Extend Linux PTY coverage through the C ABI and Deno adapter.
+- [x] Extend Linux PTY coverage through the C ABI and Deno adapter.
 - [ ] Verify terminal lifecycle and adapter behavior on macOS with PTY coverage.
-- [ ] Add equivalent Windows console/ConPTY coverage, including input, resize,
-      concurrent shutdown, and mode restoration.
-- [ ] Add CI for TypeScript checks/tests/lint/formatting, Rust tests/Clippy/
+- [x] Add equivalent Windows console/ConPTY coverage, including input, resize,
+      concurrent shutdown, and mode restoration (implemented; execution
+      pending).
+- [ ] Verify Windows console/ConPTY coverage on Windows.
+- [x] Add CI for TypeScript checks/tests/lint/formatting, Rust tests/Clippy/
       formatting, and supported-platform integration tests.
-- [ ] Define the supported target and toolchain matrix and build native
+- [x] Define the supported target and toolchain matrix and build native
       artifacts for each release target.
-- [ ] Package native artifacts with version metadata, checksums, and both
+- [x] Package native artifacts with version metadata, checksums, and both
       license texts; verify loading from a clean Deno environment.
-- [ ] Prepare package exports, installation instructions, runnable examples, and
+- [x] Prepare package exports, installation instructions, runnable examples, and
       release checks before publishing the JSR packages and native artifacts.
 
 Complete when every advertised target passes the integration suite and a clean

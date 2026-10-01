@@ -2,14 +2,17 @@
   "workspace": [
     "./packages/protocol",
     "./packages/core",
-    "./packages/deno"
+    "./packages/deno",
+    "./packages/native"
   ],
   "tasks": {
-    "check": "deno check packages/protocol/mod.ts packages/core/mod.ts packages/deno/mod.ts",
+    "check": "deno check packages/protocol/mod.ts packages/core/mod.ts packages/deno/mod.ts packages/native/mod.ts",
     "test": "deno test --allow-read=tests/fixtures packages",
     "test:native": "cargo test --manifest-path native/Cargo.toml",
-    "lint": "deno lint packages",
-    "fmt": "deno fmt packages docs tests/fixtures README.md deno.json"
+    "lint": "deno lint packages examples tests/integration",
+    "fmt": "deno fmt packages docs examples tests/fixtures tests/integration/*.ts README.md deno.json",
+    "test:integration": "python3 tests/integration/run.py",
+    "package:native": "python3 scripts/package-native.py"
   },
   "compilerOptions": {
     "strict": true,

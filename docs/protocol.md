@@ -1,7 +1,7 @@
 # Rendering protocol v1
 
-The initial transport is UTF-8 JSON. Protocol versioning is independent of the
-future C ABI version. A frame is:
+The initial transport is UTF-8 JSON. Protocol versioning is independent of the C
+ABI version. A frame is:
 
 ```json
 {
