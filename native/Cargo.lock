@@ -534,6 +534,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ratatui-js-ffi"
+version = "0.1.0"
+dependencies = [
+ "ratatui-js-core",
+ "ratatui-js-crossterm",
+ "serde_json",
+]
+
+[[package]]
 name = "ratatui-widgets"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -48,20 +48,20 @@ and the schema is documented alongside the [protocol](protocol.md) and
 
 ## Native C ABI
 
-- [ ] Add `native/ffi` as a shared-library crate wrapping the existing Crossterm
+- [x] Add `native/ffi` as a shared-library crate wrapping the existing Crossterm
       session.
-- [ ] Finalize fixed-width statuses, opaque handles, pointer/length buffers, and
+- [x] Finalize fixed-width statuses, opaque handles, pointer/length buffers, and
       a C header. Keep ABI versioning independent of protocol versioning.
-- [ ] Implement `rt_abi_version`, `rt_create`, `rt_render`, `rt_poll_event`,
+- [x] Implement `rt_abi_version`, `rt_create`, `rt_render`, `rt_poll_event`,
       `rt_close`, `rt_destroy`, and `rt_bytes_free`.
-- [ ] Validate boundary inputs and configuration before changing terminal modes.
-- [ ] Keep event, timeout, closed, and error results distinct; return explicitly
+- [x] Validate boundary inputs and configuration before changing terminal modes.
+- [x] Keep event, timeout, closed, and error results distinct; return explicitly
       owned output and error buffers.
-- [ ] Contain unwindable panics at ABI entry points and retain access to cleanup
+- [x] Contain unwindable panics at ABI entry points and retain access to cleanup
       after a failed operation.
-- [ ] Specify when handles and buffers may be released, including outstanding
+- [x] Specify when handles and buffers may be released, including outstanding
       calls and concurrent render, poll, and close operations.
-- [ ] Add C integration tests for successful calls, rejected inputs, version
+- [x] Add C integration tests for successful calls, rejected inputs, version
       negotiation, buffer release, rendering while polling, and closing while
       polling.
 
