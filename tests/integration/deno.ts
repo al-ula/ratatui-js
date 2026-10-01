@@ -23,9 +23,19 @@ const frame = createFrame({
   type: "paragraph",
   lines: [[{ text: "PTY frame" }]],
 });
+async function nextInputEvent() {
+  // ConPTY may report the existing dimensions before the host sends input.
+  while (true) {
+    const event = await driver.nextEvent();
+    if (event?.type === "resize" && event.width === 80 && event.height === 24) {
+      continue;
+    }
+    return event;
+  }
+}
 try {
   assertEquals((await driver.render(frame)).width, 80);
-  const pending = driver.nextEvent();
+  const pending = nextInputEvent();
   await assertRejects(() => driver.nextEvent());
   // Waiting for native input must allow timers and native rendering to progress.
   await new Promise((resolve) => setTimeout(resolve, 150));
@@ -45,7 +55,7 @@ try {
       } else if (event.key.type === "character" && event.key.value === "q") {
         break;
       }
-      event = await driver.nextEvent();
+      event = await nextInputEvent();
     }
     if (scenario === "interrupt") assertEquals(event, null);
   }

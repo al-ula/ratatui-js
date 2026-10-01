@@ -19,6 +19,11 @@ static int contains(RtBytes bytes, const char *text) {
     memcpy(copy, bytes.data, bytes.len); copy[bytes.len] = 0;
     int found = strstr(copy, text) != NULL; free(copy); return found;
 }
+static void release_initial_resize(RtBytes *output) {
+    assert(contains(*output, "\"type\":\"resize\""));
+    assert(contains(*output, "\"width\":80") && contains(*output, "\"height\":24"));
+    release(output);
+}
 static void *poller(void *session) {
     RtBytes output = {0}, error = {0};
     assert(rt_poll_event(session, 60000, &output, &error) == RT_CLOSED);
@@ -58,7 +63,10 @@ int main(int argc, char **argv) {
     assert(contains(error, "invalidJson")); release(&error);
     assert(rt_render(session, frame, sizeof(frame)-1, &output, &error) == RT_OK);
     assert(contains(output, "\"width\":80")); release(&output);
-    assert(rt_poll_event(session, 0, &output, &error) == RT_TIMEOUT);
+    /* ConPTY can queue a resize at the initial dimensions during startup. */
+    uint32_t initial_status = rt_poll_event(session, 0, &output, &error);
+    if (initial_status == RT_OK) release_initial_resize(&output);
+    else assert(initial_status == RT_TIMEOUT);
     if (!strcmp(scenario, "close-wait")) {
 #ifdef _WIN32
         HANDLE thread = CreateThread(NULL, 0, windows_poller, session, 0, NULL);
@@ -70,7 +78,8 @@ int main(int argc, char **argv) {
         for (int i = 0; i < 5000; i++) {
             uint32_t status = rt_poll_event(session, 0, &output, &error);
             if (status == RT_ERROR) { assert(contains(error, "concurrentEventWait")); waiting = 1; release(&error); break; }
-            assert(status == RT_TIMEOUT);
+            if (status == RT_OK) release_initial_resize(&output);
+            else assert(status == RT_TIMEOUT);
 #ifdef _WIN32
             Sleep(1);
 #else

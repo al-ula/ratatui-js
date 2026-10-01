@@ -34,10 +34,18 @@ const driver = await new DenoAdapter().open({alternateScreen: scenario !== "no-a
 const failures: unknown[] = [];
 const detach = onInterrupt(driver, error => failures.push(error));
 const frame = createFrame({type: "paragraph", lines: [[{text: "PTY frame"}]]});
+async function nextInputEvent() {
+  // Ignore ConPTY startup resize events at the existing dimensions.
+  while (true) {
+    const event = await driver.nextEvent();
+    if (event?.type === "resize" && event.width === 80 && event.height === 24) continue;
+    return event;
+  }
+}
 try {
   const result = await driver.render(frame);
   if (result.width !== 80 || result.height !== 24) throw new Error("Wrong dimensions");
-  const waiting = driver.nextEvent();
+  const waiting = nextInputEvent();
   await new Promise(resolve => setTimeout(resolve, 150));
   await driver.render(frame);
   if (scenario === "close-wait") {
@@ -52,7 +60,7 @@ try {
         if (result.width !== 90 || result.height !== 30) throw new Error("Resize failed");
         console.log("PTY_RESIZED\\r");
       } else if (event.key.type === "character" && event.key.value === "q") break;
-      event = await driver.nextEvent();
+      event = await nextInputEvent();
     }
   }
 } finally {

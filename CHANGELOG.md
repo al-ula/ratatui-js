@@ -11,10 +11,10 @@ Changes across all `@ratatui-js` packages are tracked here. Add changes under
 - Stop Unix PTY test harnesses at EOF after child exit, avoiding false timeouts
   on macOS while retaining output and terminal restoration checks.
 - Check restored Unix terminal modes before the session leader exits and macOS
-  revokes the terminal.
+  revokes the terminal, settling macOS's pending input state before comparison.
 - Align fixture DLL export declarations with definitions for MSVC compilation.
-
-## [0.1.0-beta.1]
+- Give ConPTY children their own console handles when CI redirects host input.
+- Handle ConPTY's initial resize events in terminal integration fixtures.
 
 ### Added
 

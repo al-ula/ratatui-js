@@ -28,8 +28,11 @@ class TerminalPtyTests(unittest.TestCase):
                 stack.enter_context(patch.object(harness.termios, "tcgetattr", side_effect=[[0], [1]]))
                 stack.enter_context(patch.object(harness.signal, "signal"))
                 stack.enter_context(patch.object(harness.sys, "argv", ["supervisor", "client"]))
+                stack.enter_context(patch.object(harness.sys, "platform", "darwin"))
+                ioctl = stack.enter_context(patch.object(harness.fcntl, "ioctl"))
                 with self.assertRaisesRegex(AssertionError, "terminal modes not restored"):
                     exec(harness.TERMINAL_SUPERVISOR, {})
+                self.assertEqual(ioctl.call_count, 2)
 
     def test_exited_child_drains_output_and_stops_at_eof(self):
         self.check_exited_child(0)

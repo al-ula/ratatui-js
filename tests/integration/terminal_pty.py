@@ -14,16 +14,24 @@ import time
 # Keep the terminal's session leader alive until restoration has been checked.
 # Darwin revokes the slave when the session leader exits, even if we retain it.
 TERMINAL_SUPERVISOR = """
+import fcntl
 import signal
 import subprocess
 import sys
 import termios
 
-original = termios.tcgetattr(0)
+def terminal_modes():
+    if sys.platform == "darwin":
+        # Darwin sets PENDIN when canonical mode is restored. Querying the
+        # readable byte count settles this kernel state without consuming input.
+        fcntl.ioctl(0, termios.FIONREAD, bytearray(4))
+    return termios.tcgetattr(0)
+
+original = terminal_modes()
 child = subprocess.Popen(sys.argv[1:])
 signal.signal(signal.SIGINT, lambda signum, frame: child.send_signal(signum))
 returncode = child.wait()
-restored = termios.tcgetattr(0)
+restored = terminal_modes()
 assert restored == original, f"terminal modes not restored: before={original!r}, after={restored!r}"
 if returncode == 0:
     print("PTY_MODES_RESTORED", flush=True)
