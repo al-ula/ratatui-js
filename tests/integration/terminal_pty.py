@@ -60,7 +60,8 @@ def run_scenario(command, scenario):
                 (scenario == "keyboard" and b"PTY_RESIZED" in output)
                 or (scenario == "no-alternate" and b"PTY_READY" in output)
             ):
-                os.write(master, b"q")
+                keys = b"\x1b[B\x1b[B\x1b[Aq" if any("application.ts" in arg for arg in command) else b"q"
+                os.write(master, keys)
                 sent_quit = True
             if process.poll() is not None and not ready:
                 break

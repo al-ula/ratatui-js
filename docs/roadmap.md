@@ -15,9 +15,9 @@ Milestones are ordered by their dependencies; unchecked items are planned work.
       explicit shutdown in `native/crossterm`.
 - [x] A Rust terminal example and Linux PTY lifecycle coverage.
 
-JavaScript cannot yet open a real terminal through these packages. The C ABI,
-Deno adapter, application runner, and UI builders remain unimplemented. macOS
-and Windows terminal integration remain unverified.
+JavaScript can open a real terminal through the C ABI and Deno adapter. The
+application runner and UI builders are implemented. Linux integration is
+verified through Rust, C, and Deno; macOS and Windows remain unverified.
 
 ## Implementation order
 
@@ -93,17 +93,17 @@ wait does not block JavaScript or prevent rendering and close.
 
 ## Application runner and UI builders
 
-- [ ] Define a runtime-independent runner API for model updates, event handling,
+- [x] Define a runtime-independent runner API for model updates, event handling,
       frame construction, and explicit exit.
-- [ ] Implement initial drawing, serialized model updates, resize invalidation,
+- [x] Implement initial drawing, serialized model updates, resize invalidation,
       redraw coalescing, and cleanup in `finally`.
-- [ ] Make returned list state available to the application while keeping model
+- [x] Make returned list state available to the application while keeping model
       ownership in JavaScript.
-- [ ] Add focused builders for the existing row, column, block, paragraph, and
+- [x] Add focused builders for the existing row, column, block, paragraph, and
       list protocol nodes.
-- [ ] Use the fake driver to test update ordering, redraw scheduling, closure,
+- [x] Use the fake driver to test update ordering, redraw scheduling, closure,
       and failures in application callbacks or driver operations.
-- [ ] Add a Deno example covering state updates, list selection, resize, and
+- [x] Add a Deno example covering state updates, list selection, resize, and
       exit through the runner and real adapter.
 
 Complete when the example handles its full application lifecycle through the
