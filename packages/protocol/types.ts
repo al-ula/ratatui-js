@@ -115,12 +115,34 @@ export type ErrorCode =
   | "invalidJson"
   | "invalidFrame"
   | "unsupportedProtocol"
-  | "io";
+  | "io"
+  | "terminalBusy"
+  | "terminalPoisoned"
+  | "notTerminal"
+  | "rawModeActive"
+  | "closed"
+  | "renderingFailed"
+  | "concurrentEventWait"
+  | "invalidTimeout"
+  | "input"
+  | "panic"
+  | "initialization"
+  | "shutdown"
+  | "invalidArgument"
+  | "unsupportedAbi";
 
 export interface ErrorDescription {
   readonly code: ErrorCode;
   readonly message: string;
   readonly path?: string;
+  readonly operation?: string;
+  readonly cause?: ErrorDescription;
+  readonly cleanup?: readonly CleanupFailure[];
+}
+
+export interface CleanupFailure {
+  readonly operation: string;
+  readonly message: string;
 }
 
 export type KeyCode =

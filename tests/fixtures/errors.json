@@ -1,0 +1,102 @@
+[
+  {
+    "code": "invalidJson",
+    "message": "invalidJson"
+  },
+  {
+    "code": "invalidFrame",
+    "message": "invalidFrame",
+    "path": "root.lines"
+  },
+  {
+    "code": "unsupportedProtocol",
+    "message": "unsupportedProtocol"
+  },
+  {
+    "code": "io",
+    "message": "io",
+    "operation": "render"
+  },
+  {
+    "code": "terminalBusy",
+    "message": "terminalBusy"
+  },
+  {
+    "code": "terminalPoisoned",
+    "message": "terminalPoisoned"
+  },
+  {
+    "code": "notTerminal",
+    "message": "notTerminal"
+  },
+  {
+    "code": "rawModeActive",
+    "message": "rawModeActive"
+  },
+  {
+    "code": "closed",
+    "message": "closed"
+  },
+  {
+    "code": "renderingFailed",
+    "message": "renderingFailed"
+  },
+  {
+    "code": "concurrentEventWait",
+    "message": "concurrentEventWait"
+  },
+  {
+    "code": "invalidTimeout",
+    "message": "invalidTimeout"
+  },
+  {
+    "code": "input",
+    "message": "input"
+  },
+  {
+    "code": "panic",
+    "message": "panic",
+    "operation": "render"
+  },
+  {
+    "code": "initialization",
+    "message": "initialization",
+    "cleanup": [
+      {
+        "operation": "raw mode",
+        "message": "failed"
+      },
+      {
+        "operation": "cursor",
+        "message": "failed too"
+      }
+    ],
+    "cause": {
+      "code": "io",
+      "message": "open failed",
+      "operation": "initialize"
+    }
+  },
+  {
+    "code": "shutdown",
+    "message": "shutdown",
+    "cleanup": [
+      {
+        "operation": "raw mode",
+        "message": "failed"
+      },
+      {
+        "operation": "cursor",
+        "message": "failed too"
+      }
+    ]
+  },
+  {
+    "code": "invalidArgument",
+    "message": "invalidArgument"
+  },
+  {
+    "code": "unsupportedAbi",
+    "message": "unsupportedAbi"
+  }
+]

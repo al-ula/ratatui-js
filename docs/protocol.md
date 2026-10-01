@@ -102,3 +102,18 @@ kind, and modifiers; availability depends on the terminal and platform. Events
 or key codes/modifiers outside this contract are ignored rather than
 misrepresented. Mouse, paste, focus, and enhanced keyboard-mode negotiation are
 deferred.
+
+## Lifecycle errors
+
+Errors use `{code, message, path?, operation?, cause?, cleanup?}`. Frame codes
+`invalidJson`, `invalidFrame`, `unsupportedProtocol`, and `io` retain their
+field paths. Lifecycle codes are `terminalBusy`, `terminalPoisoned`,
+`notTerminal`, `rawModeActive`, `closed`, `renderingFailed`,
+`concurrentEventWait`, `invalidTimeout`, `input`, `panic`, `initialization`, and
+`shutdown`. ABI boundary errors additionally use `invalidArgument` and
+`unsupportedAbi`.
+
+`initialization` includes its original structured `cause` and every rollback
+failure in `cleanup`. `shutdown` includes all cleanup failures. Each cleanup
+entry has `operation` and `message`; cleanup continues after a failed step.
+Shared examples live in `tests/fixtures/errors.json`.

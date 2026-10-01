@@ -10,6 +10,6 @@ mod input;
 mod session;
 mod terminal;
 
-pub use error::{CleanupFailure, SessionError};
+pub use error::{CleanupDescription, CleanupFailure, ErrorDescription, SessionError};
 pub use events::{KeyCode, KeyKind, KeyModifier, TerminalEvent};
 pub use session::{EventPoll, Session, SessionOptions};
