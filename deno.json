@@ -10,7 +10,7 @@
     "test": "deno test --allow-read=tests/fixtures packages",
     "test:native": "cargo test --manifest-path native/Cargo.toml",
     "lint": "deno lint packages examples tests/integration",
-    "fmt": "deno fmt packages docs examples tests/fixtures tests/integration/*.ts README.md deno.json",
+    "fmt": "deno fmt packages docs examples tests/fixtures tests/integration/*.ts CHANGELOG.md README.md deno.json",
     "test:integration": "python3 tests/integration/run.py",
     "package:native": "python3 scripts/package-native.py"
   },

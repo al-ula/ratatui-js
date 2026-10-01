@@ -28,6 +28,8 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.9.6
+      - name: Extract changelog notes
+        run: python3 scripts/release_notes.py "$GITHUB_REF_NAME" --output "$RUNNER_TEMP/release-notes.md"
       - uses: actions/download-artifact@v8
         with:
           pattern: native-bundle-*
@@ -41,4 +43,9 @@ jobs:
       - name: Publish native archives
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" release-bundles/*.zip --verify-tag --generate-notes
+        run: |
+          release_flags=()
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            release_flags+=(--prerelease --latest=false)
+          fi
+          gh release create "$GITHUB_REF_NAME" release-bundles/*.zip --verify-tag --notes-file "$RUNNER_TEMP/release-notes.md" "${release_flags[@]}"

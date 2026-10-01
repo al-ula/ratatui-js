@@ -47,6 +47,9 @@ library path. See [installation and release checks](docs/releases.md). JSR
 publishing runs only for version tags; ordinary pushes and pull requests only
 run checks.
 
+See the [changelog](CHANGELOG.md) for changes across all packages. Each GitHub
+Release includes the corresponding version's changelog notes.
+
 ## Development
 
 Verified locally with Rust 1.98.0 and Deno 2.9.6. Earlier toolchain versions

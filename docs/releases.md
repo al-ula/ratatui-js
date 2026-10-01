@@ -93,13 +93,33 @@ authentication (`id-token: write`); no stored JSR token or publishing secret is
 needed. GitHub release attachments use the workflow's built-in, run-scoped
 `github.token`. Linking does not itself publish the repository.
 
-Only pushing a stable version tag such as `v0.1.0` triggers `release.yml`.
-Ordinary pushes, pull requests, and manual check runs never publish. The release
-workflow checks every crate/package version against the tag, runs the full
-three-platform CI suite, merges checksum-verified native archives into the JSR
-wrapper, checks the publish payload, publishes the workspace, and creates a
-GitHub release with the standalone archives. Generated native bytes explain the
-workflow's `--allow-dirty`: they are staged after checking out the tag.
+Only pushing a version tag such as `v0.1.0-beta.1` or `v0.1.0` triggers
+`release.yml`. Prerelease tags create GitHub prereleases and are not marked as
+the latest release. Ordinary pushes, pull requests, and manual check runs never
+publish. The release workflow checks every crate/package version and the
+changelog against the tag, runs the full three-platform CI suite, merges
+checksum-verified native archives into the JSR wrapper, checks the publish
+payload, publishes the workspace, and creates a GitHub release with the
+standalone archives and that version's changelog notes. Generated native bytes
+explain the workflow's `--allow-dirty`: they are staged after checking out the
+tag.
+
+Track changes for all four packages in [`CHANGELOG.md`](../CHANGELOG.md) under
+`## [Unreleased]` as work lands. Before tagging, move those notes into a section
+such as `## [0.2.0] - 2026-10-01`, leaving `Unreleased` for future changes. The
+date is optional; the version must match the tag without its `v` prefix. Use
+third-level headings such as `### Added`, `### Changed`, and `### Fixed` to
+group entries, naming the affected packages when helpful. Keep past version
+sections.
+
+The release gate rejects missing, duplicate, or empty notes for the tagged
+version before publishing. Only that version's section becomes the GitHub
+Release body; `Unreleased` and older versions are excluded. Preview the body
+locally with:
+
+```sh
+python3 scripts/release_notes.py v0.1.0-beta.1 --output /tmp/ratatui-js-release-notes.md
+```
 
 Update versions through the relevant package-manager CLIs and commit changes
 before tagging. Do not tag until all advertised target results have been

@@ -31,7 +31,7 @@ jobs:
       - run: deno task check
       - run: deno task test
       - run: deno task lint
-      - run: deno fmt --check packages docs examples tests/fixtures tests/integration/*.ts README.md deno.json
+      - run: deno fmt --check packages docs examples tests/fixtures tests/integration/*.ts CHANGELOG.md README.md deno.json
       - run: cargo fmt --manifest-path native/Cargo.toml --all --check
       - run: cargo test --manifest-path native/Cargo.toml --locked
       - run: cargo clippy --manifest-path native/Cargo.toml --all-targets --locked -- -D warnings
