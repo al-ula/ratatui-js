@@ -71,19 +71,19 @@ Existing renderer and session tests must continue passing.
 
 ## Deno adapter
 
-- [ ] Add `packages/deno` implementing `PlatformAdapter` and `TerminalDriver`.
-- [ ] Load the correct native artifact and reject unsupported ABI/protocol
+- [x] Add `packages/deno` implementing `PlatformAdapter` and `TerminalDriver`.
+- [x] Load the correct native artifact and reject unsupported ABI/protocol
       versions before opening a session.
-- [ ] Use nonblocking FFI bindings for potentially blocking operations,
+- [x] Use nonblocking FFI bindings for potentially blocking operations,
       serialize renders, and reject a second outstanding event wait.
-- [ ] Decode and validate native results, copy owned bytes, and free
+- [x] Decode and validate native results, copy owned bytes, and free
       output/error buffers in `finally`.
-- [ ] Retry native event timeouts and map native closure to `null`.
-- [ ] Make close idempotent: wake polling first, await outstanding calls,
+- [x] Retry native event timeouts and map native closure to `null`.
+- [x] Make close idempotent: wake polling first, await outstanding calls,
       destroy the handle, and unload only after all buffers are released.
-- [ ] Integrate interrupt cleanup at the adapter/application boundary and report
+- [x] Integrate interrupt cleanup at the adapter/application boundary and report
       terminal restoration failures.
-- [ ] Add an example and integration tests using the actual shared library for
+- [x] Add an example and integration tests using the actual shared library for
       rendering, input, resize, concurrent shutdown, load/version failures, and
       interrupt cleanup.
 

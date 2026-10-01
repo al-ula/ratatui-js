@@ -4,6 +4,7 @@ import errno
 import fcntl
 import os
 import select
+import signal
 import struct
 import subprocess
 import sys
@@ -36,6 +37,7 @@ def run_scenario(command, scenario):
         deadline = time.monotonic() + 10
         sent_resize = False
         sent_quit = False
+        sent_interrupt = False
         while True:
             assert time.monotonic() < deadline, f"{scenario}: child timed out"
             ready, _, _ = select.select([master], [], [], 0.05)
@@ -51,6 +53,9 @@ def run_scenario(command, scenario):
             if scenario == "keyboard" and b"PTY_READY" in output and not sent_resize:
                 fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 30, 90, 0, 0))
                 sent_resize = True
+            if scenario == "interrupt" and b"PTY_READY" in output and not sent_interrupt:
+                os.kill(process.pid, signal.SIGINT)
+                sent_interrupt = True
             if not sent_quit and (
                 (scenario == "keyboard" and b"PTY_RESIZED" in output)
                 or (scenario == "no-alternate" and b"PTY_READY" in output)
@@ -91,5 +96,5 @@ def run_scenario(command, scenario):
         os.close(slave)
 
 
-for scenario in ("keyboard", "no-alternate", "close-wait"):
+for scenario in ("keyboard", "no-alternate", "close-wait", "interrupt") if "deno" in sys.argv[1] else ("keyboard", "no-alternate", "close-wait"):
     run_scenario(sys.argv[1:], scenario)

@@ -1,7 +1,11 @@
 {
-  "workspace": ["./packages/protocol", "./packages/core"],
+  "workspace": [
+    "./packages/protocol",
+    "./packages/core",
+    "./packages/deno"
+  ],
   "tasks": {
-    "check": "deno check packages/protocol/mod.ts packages/core/mod.ts",
+    "check": "deno check packages/protocol/mod.ts packages/core/mod.ts packages/deno/mod.ts",
     "test": "deno test --allow-read=tests/fixtures packages",
     "test:native": "cargo test --manifest-path native/Cargo.toml",
     "lint": "deno lint packages",
